@@ -342,3 +342,34 @@ Cleanup: deleted the one test order ("Split Test") this task's verification crea
 screenshot script filled the name field with "Ada" but never clicked Place Order, so it left no row
 behind — checked before deleting anything under that name, since it's also the input's own
 placeholder text and could plausibly collide with real data later.
+
+## Reskin /menu against two reference screenshots
+
+Asked to match two screenshots from an unrelated Replit-hosted reference app: one of the menu grid
+(icon-badge cards, terracotta price, clock-icon prep time, compact dark "+ Add" pill, a decorated
+floating cart button), and — added mid-turn as a follow-up — one of what opens when that button is
+clicked (a full "Your order." page: table label, itemized list card with per-line steppers and a
+trash icon, and a dark "Ready when you are." summary card with subtotal and a big Place Order
+button). Told explicitly to keep our real seeded menu, naira formatting, and existing copy — only
+the visual structure was reference material.
+
+Judgment call, flagged rather than asked or silently decided: the reference's cart view lives at
+its own `/cart` URL, but the previous task had explicitly capped this feature at one new route
+(`/menu`) and ruled out additions like `/pay`/`/rate`. Rather than add a third route on the strength
+of a screenshot's address bar, implemented the opened-cart view as a same-route full-screen swap
+inside `MenuOrderFlow` (its own return branch, gated on `isCartOpen`) — visually indistinguishable
+from a real page from the user's side, but doesn't touch the route budget from two turns ago.
+
+Built six small hand-drawn inline SVG icons (fork/knife, shopping bag, clock, check, plus, trash)
+local to `MenuOrderFlow.tsx`, matching the pattern `LandingHero.tsx` already set for its own
+sparkle/pin icons rather than reaching for emoji or a new icon-library dependency.
+
+Verified: `tsc --noEmit` and `npm run build` clean; `npx eslint .` shows only the same
+`ActiveOrderBanner.tsx` error carried since the order-continuity work, nothing new introduced.
+Playwright at 390px and 1280px on both the grid and the full-screen cart view: no horizontal
+overflow either width, the trash icon actually removes a line, and a full order placement —
+including removing one line first — completes end-to-end. One flaky run during testing turned out
+to be the test script clicking Place Order a beat too fast after a re-render, not an app bug;
+adding a short synchronous read before the click made it reproducible-clean.
+
+Cleanup: deleted the "Reskin Test" and "Reskin Desktop" test orders this verification created.
