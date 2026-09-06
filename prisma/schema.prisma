@@ -20,7 +20,6 @@ enum MenuCategory {
 
 enum OrderStatus {
   PLACED
-  PREPARING
   SERVED
   PAID
 }
