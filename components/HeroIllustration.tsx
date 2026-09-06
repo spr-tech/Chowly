@@ -1,6 +1,3 @@
-// Purely decorative — five concentric organic blobs (the classic
-// "irregular border-radius" trick) each rotated a few degrees differently
-// so their edges don't line up into a perfect, spinner-like circle.
 const BLOBS = [
   { sizePct: 100, colorClass: "bg-saffron", radius: "58% 42% 63% 37% / 41% 56% 44% 59%", rotate: -12 },
   { sizePct: 76, colorClass: "bg-green", radius: "38% 62% 42% 58% / 58% 40% 60% 42%", rotate: 18 },
@@ -9,11 +6,13 @@ const BLOBS = [
   { sizePct: 27, colorClass: "bg-terracotta", radius: "62% 38% 58% 42% / 40% 63% 35% 65%", rotate: -14 },
 ] as const;
 
+
+
 export function HeroIllustration() {
   return (
     <div
       aria-hidden="true"
-      className="relative mx-auto h-70 w-70 md:h-130 md:w-130"
+      className="relative mx-auto hidden md:block md:h-[520px] md:w-[520px]"
     >
       {BLOBS.map((blob, i) => (
         <div
@@ -28,7 +27,7 @@ export function HeroIllustration() {
         />
       ))}
 
-      <div className="absolute -bottom-6 -left-4 w-40 rotate-[-8deg] rounded-xl bg-cream p-4 shadow-lg md:-bottom-8 md:-left-6 md:w-48">
+      <div className="absolute -bottom-8 -left-6 w-48 rotate-[-8deg] rounded-xl bg-cream p-4 shadow-lg">
         <p className="text-xs font-semibold tracking-widest text-terracotta uppercase">
           Ready in 20 min
         </p>
