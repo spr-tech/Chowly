@@ -10,9 +10,9 @@ interface WaitTimeItem {
 //
 // Kitchen and bar work on an order's items in parallel, so the slowest single
 // item — not their sum — sets the floor; the queue term accounts for orders
-// still ahead in the restaurant's one kitchen/bar. "Active" means status
-// PLACED or PREPARING — a SERVED-but-unpaid order has already cleared the
-// kitchen, so it doesn't hold up anyone else's estimate.
+// still ahead in the restaurant's one kitchen/bar. "Active" means status =
+// PLACED — a SERVED-but-unpaid order has already cleared the kitchen, so it
+// doesn't hold up anyone else's estimate.
 export function calculateEstimatedWaitMinutes(
   items: WaitTimeItem[],
   activeOrdersAheadCount: number,
