@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { payOrder, fileComplaint, submitRating } from "@/app/actions/orders";
 import { formatNaira } from "@/lib/money";
+import { ACTIVE_ORDER_STORAGE_KEY } from "@/lib/storage";
 
 interface PaymentInfo {
   amountKobo: number;
@@ -40,6 +41,14 @@ export function CustomerOrderActions({
       const result = await payOrder(orderId);
       if (result?.error) {
         setPayError(result.error);
+        return;
+      }
+      try {
+        if (localStorage.getItem(ACTIVE_ORDER_STORAGE_KEY) === orderId) {
+          localStorage.removeItem(ACTIVE_ORDER_STORAGE_KEY);
+        }
+      } catch {
+        // localStorage unavailable — payment still succeeded either way
       }
     });
   }

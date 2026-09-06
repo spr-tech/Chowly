@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { calculateEstimatedWaitMinutes } from "@/lib/wait-time";
@@ -18,7 +17,7 @@ interface PlaceOrderInput {
   items: PlaceOrderItem[];
 }
 
-export async function placeOrder(input: PlaceOrderInput): Promise<{ error: string } | void> {
+export async function placeOrder(input: PlaceOrderInput): Promise<{ error: string } | { orderId: string }> {
   const customerName = input.customerName.trim();
   if (!customerName) {
     return { error: "Enter your name." };
@@ -95,7 +94,10 @@ export async function placeOrder(input: PlaceOrderInput): Promise<{ error: strin
     throw error;
   }
 
-  redirect(`/orders/${orderId}`);
+  // The caller (CustomerOrderFlow) does the navigation itself, client-side,
+  // so it can write the order id to localStorage first. redirect() here
+  // would short-circuit before that client code ever ran.
+  return { orderId };
 }
 
 interface AssignStaffInput {

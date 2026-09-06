@@ -1,8 +1,11 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { placeOrder } from "@/app/actions/orders";
 import { formatNaira } from "@/lib/money";
+import { ACTIVE_ORDER_STORAGE_KEY } from "@/lib/storage";
+import { ActiveOrderBanner } from "@/components/ActiveOrderBanner";
 
 interface TableOption {
   id: number;
@@ -26,6 +29,7 @@ export function CustomerOrderFlow({
   tables: TableOption[];
   menuItems: MenuItemOption[];
 }) {
+  const router = useRouter();
   const [tableId, setTableId] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [cart, setCart] = useState<Record<number, number>>({});
@@ -57,14 +61,25 @@ export function CustomerOrderFlow({
         customerName,
         items: cartLines.map((line) => ({ menuItemId: line.id, quantity: line.quantity })),
       });
-      if (result?.error) {
+      if ("error" in result) {
         setError(result.error);
+        return;
       }
+
+      try {
+        localStorage.setItem(ACTIVE_ORDER_STORAGE_KEY, result.orderId);
+      } catch {
+        // localStorage unavailable — the order still went through, the
+        // customer just won't see the "view your current order" link later
+      }
+      router.push(`/orders/${result.orderId}`);
     });
   }
 
   return (
     <main className="p-4 max-w-2xl mx-auto space-y-6">
+      <ActiveOrderBanner />
+
       <div>
         <h1 className="text-xl font-semibold">The Juniper Room</h1>
         <p className="text-sm text-gray-600">14 Palm Avenue, Lagos</p>
