@@ -1,7 +1,6 @@
-// No auth: the Customer/Staff toggle in the header is the only access
-// control there is. This just names the two states so the rest of the app
-// has one shared vocabulary for it — the cookie is written/read once the
-// header toggle exists (customer/staff flow phases).
+// No auth: the Customer/Staff toggle in the header (components/RoleToggle.tsx)
+// is the only access control there is. This just names the two states so the
+// rest of the app has one shared vocabulary for it.
 export type ViewerRole = "customer" | "staff";
 
 export const DEFAULT_VIEWER_ROLE: ViewerRole = "customer";

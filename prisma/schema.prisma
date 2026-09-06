@@ -73,8 +73,8 @@ model Staff {
   ordersAsBartender Order[] @relation("OrderBartender")
 }
 
-// Seeded. The customer reaches a table via /t/[number], where `number` is the
-// human-facing table number, not this id.
+// Seeded. The customer picks a table from a dropdown on the landing page;
+// `number` is the human-facing figure shown there, never this id.
 
 
 model DiningTable {

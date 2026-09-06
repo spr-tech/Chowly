@@ -31,7 +31,7 @@ export function CustomerOrderActions({
   const [complaintMessage, setComplaintMessage] = useState("");
   const [complaintSent, setComplaintSent] = useState(hasComplaint);
 
-  const [ratingScore, setRatingScore] = useState(5);
+  const [ratingScore, setRatingScore] = useState(0);
   const [ratingComment, setRatingComment] = useState("");
   const [ratingSent, setRatingSent] = useState(hasRating);
 
@@ -134,6 +134,7 @@ export function CustomerOrderActions({
               onChange={(e) => setRatingScore(Number(e.target.value))}
               className="rounded-lg border border-line bg-cream p-3 text-base"
             >
+              <option value={0}>Select a rating…</option>
               {[1, 2, 3, 4, 5].map((n) => (
                 <option key={n} value={n}>
                   {n}
@@ -149,7 +150,7 @@ export function CustomerOrderActions({
             <button
               type="button"
               onClick={handleRating}
-              disabled={isPending}
+              disabled={isPending || ratingScore === 0}
               className="w-full rounded-full border border-ink px-4 py-2.5 text-sm font-medium disabled:opacity-50"
             >
               Submit Rating

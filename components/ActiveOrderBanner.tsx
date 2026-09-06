@@ -10,11 +10,18 @@ export function ActiveOrderBanner() {
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     try {
-      setActiveOrderId(localStorage.getItem(ACTIVE_ORDER_STORAGE_KEY));
+      const storedOrderId = localStorage.getItem(ACTIVE_ORDER_STORAGE_KEY);
+      setTimeout(() => {
+        if (!cancelled) setActiveOrderId(storedOrderId);
+      }, 0);
     } catch {
       // localStorage unavailable — no banner, not an error
     }
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (!activeOrderId) {
