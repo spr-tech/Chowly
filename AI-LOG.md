@@ -98,3 +98,55 @@ Renamed to `activeOrdersAheadCount` and rewrote the doc comment to spell out tha
 `status IN (PLACED, PREPARING)`, not `status != PAID`. No query existed yet to fix (that lands
 with the order-placement server action in a later phase) — the comment is the guardrail for
 writing it correctly then.
+
+## Deadline pass: schema + phases 2-4 in one continuous build
+
+Asked, under a hard deadline: build phases 2-4 in one pass, no stopping between them, no review
+gate — just build and report when a customer can go menu-to-paid without an error. Scope cuts
+given: drop `PREPARING` entirely (`PLACED -> SERVED -> PAID` only), no `/t/[number]` route (landing
+page dropdown only), minimal Tailwind styling. Two corrections carried in: the wait-time queue
+count must filter `status = PLACED` (not `!= PAID`), and `lib/role.ts` needed an actual header
+toggle, not just the type.
+
+Schema: dropped `PREPARING` from `OrderStatus`. `prisma migrate dev` couldn't run non-interactively
+in this shell (it needs a TTY to confirm the enum-value-removal warning), so used
+`--create-only`... which then hit intermittent `P1001`s reaching Neon (cold-start latency on the
+pooled endpoint — confirmed by a raw `pg` connection succeeding seconds apart from a failing
+Prisma one, and by direct TCP tests). Rather than fight shadow-database flakiness, hand-wrote the
+migration SQL directly (rename type, recreate without PREPARING, recast the column, drop the old
+type) and applied it with `migrate deploy`, which only needs one connection. Safe: no `Order` rows
+existed yet.
+
+Before writing any App Router code: read `node_modules/next/dist/docs/` per AGENTS.md, since this
+project is Next 16 and several APIs differ from training data — confirmed `cookies()`/`params` are
+async, the `PageProps<'route'>` / `LayoutProps<'route'>` global helpers (already used in the
+existing `layout.tsx`), and that `cacheComponents` (which would force Suspense boundaries around
+dynamic data) is off by default here. Ran `npx next typegen` before type-checking so
+`PageProps<'/orders/[id]'>` would resolve.
+
+Built:
+- `app/actions/orders.ts` — `placeOrder` (Serializable transaction: re-checks table occupancy
+  server-side, counts PLACED orders for the queue term, creates Customer + Order + OrderItems,
+  redirects to the order's cuid URL), `assignStaffAndServe` (waiter/chef/bartender assignment and
+  PLACED->SERVED happen together — no auth, so there's no session to infer an "acting waiter" from
+  otherwise), `payOrder` (SERVED-only guard, Payment + status->PAID in one transaction — this is
+  what frees the table, since occupancy is derived), `fileComplaint`/`submitRating` (upsert on the
+  1:1 orderId).
+- `app/actions/role.ts` — `setViewerRole` sets the cookie and redirects to `/` or `/staff`.
+- `components/RoleToggle.tsx` — the actual header toggle (was missing after the lib phase).
+- `components/CustomerOrderFlow.tsx` — single-page flow: name, table dropdown (occupied tables
+  disabled), two-section menu with quantity steppers, live cart total, Place Order.
+- `components/StaffOrderActions.tsx` / `CustomerOrderActions.tsx` — role-specific action panels.
+- `app/page.tsx`, `app/staff/page.tsx`, `app/orders/[id]/page.tsx` — `/orders/[id]` is shared by
+  both roles and branches purely on the role cookie (no auth, so this is presentation-only, not a
+  security boundary, matching `lib/role.ts`'s original design note).
+
+Verified: `tsc --noEmit` clean throughout. Full end-to-end pass with a scripted Playwright run
+against the system-installed Chrome (via `channel: "chrome"`, avoiding a slow Chromium download) —
+menu -> cart -> place order -> staff assigns chef/waiter/bartender and marks served -> customer
+sees the SERVED-only pay button -> pays -> receipt shows "SIMULATED PAYMENT — not a real
+transaction" verbatim -> table becomes selectable again. Zero browser console errors. Confirmed
+the wait-time math against seed data (Efo Riro 30 min + Zobo 3 min -> max(30,3) + 3x0 = 30) and the
+₦ totals.
+
+Rejected: none.
