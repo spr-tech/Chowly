@@ -204,3 +204,41 @@ unchanged, confirmed a hard reload also survives, placed the order, confirmed th
 returned to "/" and confirmed the banner linked to the exact right order id. Also noticed (and left
 untouched) a real in-progress order the user had placed themselves on their own dev server during
 this — cleaned up only the row my own script created, matched by its distinctive test name.
+
+## Styling pass
+
+Asked: fix the dark-mode blocker, apply a named 8-color palette as Tailwind v4 `@theme` variables,
+serif headings/sans body, card treatment, terracotta reserved for primary actions only, status as a
+coloured pill, a loud (never muted) simulated-payment label, mobile-first breathing room and tap
+targets, "The Juniper Room" header + toggle + small muted footer. No logic or schema changes.
+
+Built: removed the create-next-app `prefers-color-scheme: dark` block and added `color-scheme:
+light` on `:root` so browser chrome (form controls, scrollbars) can't quietly go dark either. The
+eight named colors live as plain `:root` custom properties, then get mapped into `@theme inline`
+(matching the existing pattern already in the file for the Geist font variables) so they're usable
+as ordinary Tailwind utilities — `bg-cream`, `text-ink`, `border-line`, etc. — rather than only
+reachable via arbitrary-value syntax. Added `Lora` via `next/font/google` for `font-serif`
+(headings only); dropped `Geist_Mono`, which was loaded but never referenced by any `font-mono`
+utility anywhere in the app.
+
+Interpreted "terracotta: primary buttons only, nothing else terracotta" literally and audited every
+use: Place Order / Mark Served / Pretend to Pay are the only terracotta-filled buttons (one per
+screen, matching what each screen is actually for). Error text, the "view your current order" link,
+and the secondary Complaint/Rating buttons deliberately do NOT use terracotta (ink text, outlined
+ink buttons instead) even though it would have been visually easy to reach for it there too.
+
+Added `components/StatusBadge.tsx` (new shared component — PLACED -> saffron pill, SERVED/PAID ->
+green pill) rather than duplicate the color-mapping logic in both the staff list and the order
+detail page. The simulated-payment panel uses a bordered saffron block specifically so it can't be
+mistaken for muted/secondary content, per "never muted."
+
+Verified: `tsc --noEmit` clean, `npm run build` succeeds (including fetching Lora at build time, a
+genuine network dependency worth knowing about), and a scripted Playwright pass at both a 390px
+mobile viewport and a 1024px desktop viewport against the real seeded menu and the user's own real
+in-progress order — zero console errors, all four card types and the status pill render correctly
+in both roles.
+
+Flagged, not fixed (logic, not styling, so out of scope for this pass): `npx eslint .` reports
+`react-hooks/set-state-in-effect` on the two localStorage-restore effects added in the previous
+turn (`CustomerOrderFlow`, `ActiveOrderBanner`). Confirmed via `git stash` that this predates this
+commit entirely — it's a leftover from the order-continuity work, not introduced here.
