@@ -121,56 +121,60 @@ export function CustomerOrderFlow({
   }
 
   return (
-    <main className="p-4 max-w-2xl mx-auto space-y-6">
+    <main className="mx-auto max-w-2xl space-y-6 p-4 pb-10">
       <ActiveOrderBanner />
 
       <div>
-        <h1 className="text-xl font-semibold">The Juniper Room</h1>
-        <p className="text-sm text-gray-600">14 Palm Avenue, Lagos</p>
+        <h1 className="font-serif text-2xl font-semibold">The Juniper Room</h1>
+        <p className="text-sm text-muted">14 Palm Avenue, Lagos</p>
       </div>
 
-      <div className="space-y-2">
-        <label className="block text-sm font-medium" htmlFor="customerName">
-          Your name
-        </label>
-        <input
-          id="customerName"
-          value={customerName}
-          onChange={(e) => setCustomerName(e.target.value)}
-          className="border rounded p-2 w-full"
-          placeholder="e.g. Ada"
-        />
+      <div className="space-y-4 rounded-2xl border border-line bg-paper p-5 shadow-sm">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium" htmlFor="customerName">
+            Your name
+          </label>
+          <input
+            id="customerName"
+            value={customerName}
+            onChange={(e) => setCustomerName(e.target.value)}
+            className="w-full rounded-lg border border-line bg-cream p-3 text-base"
+            placeholder="e.g. Ada"
+          />
+        </div>
 
-        <label className="block text-sm font-medium" htmlFor="table">
-          Table
-        </label>
-        <select
-          id="table"
-          value={tableId}
-          onChange={(e) => setTableId(e.target.value)}
-          className="border rounded p-2 w-full"
-        >
-          <option value="">Select a table…</option>
-          {tables.map((table) => (
-            <option key={table.id} value={table.id} disabled={table.occupied}>
-              Table {table.number}
-              {table.occupied ? " (occupied)" : ""}
-            </option>
-          ))}
-        </select>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium" htmlFor="table">
+            Table
+          </label>
+          <select
+            id="table"
+            value={tableId}
+            onChange={(e) => setTableId(e.target.value)}
+            className="w-full rounded-lg border border-line bg-cream p-3 text-base"
+          >
+            <option value="">Select a table…</option>
+            {tables.map((table) => (
+              <option key={table.id} value={table.id} disabled={table.occupied}>
+                Table {table.number}
+                {table.occupied ? " (occupied)" : ""}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <MenuSection title="Food" items={foodItems} cart={cart} setQuantity={setQuantity} />
       <MenuSection title="Drinks" items={drinkItems} cart={cart} setQuantity={setQuantity} />
 
-      <div className="border rounded p-3 space-y-2">
-        <h2 className="font-medium">Your order</h2>
+      <div className="space-y-3 rounded-2xl border border-line bg-paper p-5 shadow-sm">
+        <h2 className="font-serif text-lg font-semibold">Your order</h2>
         {cartLines.length === 0 ? (
-          <p className="text-sm text-gray-500">No items yet.</p>
+          <p className="text-sm text-muted">No items yet.</p>
         ) : (
-          <ul className="divide-y">
+          <ul className="divide-y divide-line">
             {cartLines.map((line) => (
-              <li key={line.id} className="flex justify-between py-1">
+              <li key={line.id} className="flex justify-between py-2">
                 <span>
                   {line.quantity} x {line.name}
                 </span>
@@ -182,13 +186,13 @@ export function CustomerOrderFlow({
         <div className="text-right font-semibold">Total: {formatNaira(totalKobo)}</div>
       </div>
 
-      {error && <p className="text-red-600 text-sm">{error}</p>}
+      {error && <p className="text-sm font-medium text-ink">{error}</p>}
 
       <button
         type="button"
         onClick={handleSubmit}
         disabled={isPending || !tableId || !customerName.trim() || cartLines.length === 0}
-        className="bg-black text-white rounded px-4 py-2 disabled:opacity-50"
+        className="w-full rounded-full bg-terracotta px-4 py-3 text-base font-semibold text-white shadow-sm disabled:opacity-50"
       >
         {isPending ? "Placing order…" : "Place Order"}
       </button>
@@ -209,33 +213,33 @@ function MenuSection({
 }) {
   return (
     <div>
-      <h2 className="font-medium mb-2">{title}</h2>
-      <ul className="divide-y border rounded">
+      <h2 className="mb-2 font-serif text-lg font-semibold">{title}</h2>
+      <ul className="divide-y divide-line rounded-2xl border border-line bg-paper shadow-sm">
         {items.map((item) => {
           const quantity = cart[item.id] ?? 0;
           return (
-            <li key={item.id} className="p-2 flex items-center justify-between gap-2">
-              <div>
+            <li key={item.id} className="flex items-center justify-between gap-4 p-4">
+              <div className="space-y-1">
                 <p className="font-medium">{item.name}</p>
-                {item.description && <p className="text-sm text-gray-600">{item.description}</p>}
-                <p className="text-sm text-gray-600">
+                {item.description && <p className="text-sm text-muted">{item.description}</p>}
+                <p className="text-sm text-muted">
                   {formatNaira(item.priceKobo)} · ~{item.prepTimeMinutes} min
                 </p>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex shrink-0 items-center gap-3">
                 <button
                   type="button"
                   onClick={() => setQuantity(item.id, quantity - 1)}
-                  className="border rounded w-7 h-7"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-line text-lg leading-none"
                   aria-label={`Remove one ${item.name}`}
                 >
-                  -
+                  −
                 </button>
-                <span className="w-6 text-center">{quantity}</span>
+                <span className="w-4 text-center text-base">{quantity}</span>
                 <button
                   type="button"
                   onClick={() => setQuantity(item.id, quantity + 1)}
-                  className="border rounded w-7 h-7"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-line text-lg leading-none"
                   aria-label={`Add one ${item.name}`}
                 >
                   +

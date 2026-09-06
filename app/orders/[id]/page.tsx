@@ -5,6 +5,7 @@ import { formatNaira } from "@/lib/money";
 import { DEFAULT_VIEWER_ROLE, VIEWER_ROLE_COOKIE, isViewerRole } from "@/lib/role";
 import { StaffOrderActions } from "@/components/StaffOrderActions";
 import { CustomerOrderActions } from "@/components/CustomerOrderActions";
+import { StatusBadge } from "@/components/StatusBadge";
 
 export default async function OrderPage(props: PageProps<"/orders/[id]">) {
   const { id } = await props.params;
@@ -40,30 +41,34 @@ export default async function OrderPage(props: PageProps<"/orders/[id]">) {
       : null;
 
   return (
-    <main className="p-4 max-w-2xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold">Order for Table {order.table.number}</h1>
-        <p className="text-sm text-gray-600">Customer: {order.customer.name}</p>
-        <p className="text-sm text-gray-600">Status: {order.status}</p>
+    <main className="mx-auto max-w-2xl space-y-6 p-4 pb-10">
+      <div className="space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="font-serif text-2xl font-semibold">Table {order.table.number}</h1>
+          <StatusBadge status={order.status} />
+        </div>
+        <p className="text-sm text-muted">Customer: {order.customer.name}</p>
         {order.status === "PLACED" && (
-          <p className="text-sm text-gray-600">Estimated wait: {order.estimatedWaitMinutes} minutes</p>
+          <p className="text-sm text-muted">Estimated wait: {order.estimatedWaitMinutes} minutes</p>
         )}
       </div>
 
-      <ul className="divide-y border rounded">
-        {order.items.map((item) => (
-          <li key={item.id} className="flex justify-between p-2">
-            <span>
-              {item.quantity} x {item.nameSnapshot}
-            </span>
-            <span>{formatNaira(item.unitPriceKobo * item.quantity)}</span>
-          </li>
-        ))}
-      </ul>
-      <div className="text-right font-semibold">Total: {formatNaira(totalKobo)}</div>
+      <div className="rounded-2xl border border-line bg-paper p-5 shadow-sm">
+        <ul className="divide-y divide-line">
+          {order.items.map((item) => (
+            <li key={item.id} className="flex justify-between py-2">
+              <span>
+                {item.quantity} x {item.nameSnapshot}
+              </span>
+              <span>{formatNaira(item.unitPriceKobo * item.quantity)}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-2 text-right font-semibold">Total: {formatNaira(totalKobo)}</div>
+      </div>
 
       {(order.waiter || order.chef || order.bartender) && (
-        <div className="text-sm text-gray-600 space-y-0.5">
+        <div className="space-y-0.5 text-sm text-muted">
           {order.waiter && <p>Waiter: {order.waiter.name}</p>}
           {order.chef && <p>Chef: {order.chef.name}</p>}
           {order.bartender && <p>Bartender: {order.bartender.name}</p>}

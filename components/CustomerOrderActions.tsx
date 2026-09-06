@@ -74,22 +74,24 @@ export function CustomerOrderActions({
   return (
     <div className="space-y-4">
       {payment ? (
-        <div className="border rounded p-3 bg-yellow-50">
-          <p className="font-semibold">SIMULATED PAYMENT — not a real transaction</p>
-          <p className="text-sm">
+        <div className="rounded-2xl border-2 border-saffron bg-saffron/25 p-5 shadow-sm">
+          <p className="font-serif text-lg font-bold text-ink">
+            SIMULATED PAYMENT — not a real transaction
+          </p>
+          <p className="text-sm text-ink">
             Paid {formatNaira(payment.amountKobo)} on {new Date(payment.paidAt).toLocaleString()}
           </p>
         </div>
       ) : (
         status === "SERVED" && (
-          <div className="border rounded p-3 space-y-2">
-            <p>Total due: {formatNaira(totalKobo)}</p>
-            {payError && <p className="text-red-600 text-sm">{payError}</p>}
+          <div className="space-y-3 rounded-2xl border border-line bg-paper p-5 shadow-sm">
+            <p className="text-base">Total due: {formatNaira(totalKobo)}</p>
+            {payError && <p className="text-sm font-medium text-ink">{payError}</p>}
             <button
               type="button"
               onClick={handlePay}
               disabled={isPending}
-              className="bg-black text-white rounded px-3 py-1 disabled:opacity-50"
+              className="w-full rounded-full bg-terracotta px-4 py-3 text-base font-semibold text-white shadow-sm disabled:opacity-50"
             >
               {isPending ? "Paying…" : `Pretend to Pay ${formatNaira(totalKobo)} (Simulated)`}
             </button>
@@ -97,23 +99,23 @@ export function CustomerOrderActions({
         )
       )}
 
-      <div className="border rounded p-3 space-y-2">
-        <h2 className="font-medium">Complaint</h2>
+      <div className="space-y-3 rounded-2xl border border-line bg-paper p-5 shadow-sm">
+        <h2 className="font-serif text-lg font-semibold">Complaint</h2>
         {complaintSent ? (
-          <p className="text-sm text-gray-600">Complaint submitted.</p>
+          <p className="text-sm text-muted">Complaint submitted.</p>
         ) : (
           <>
             <textarea
               value={complaintMessage}
               onChange={(e) => setComplaintMessage(e.target.value)}
-              className="border rounded p-1 w-full"
+              className="w-full rounded-lg border border-line bg-cream p-3 text-base"
               placeholder="What went wrong?"
             />
             <button
               type="button"
               onClick={handleComplaint}
               disabled={isPending || !complaintMessage.trim()}
-              className="border rounded px-3 py-1 disabled:opacity-50"
+              className="w-full rounded-full border border-ink px-4 py-2.5 text-sm font-medium disabled:opacity-50"
             >
               Submit Complaint
             </button>
@@ -121,16 +123,16 @@ export function CustomerOrderActions({
         )}
       </div>
 
-      <div className="border rounded p-3 space-y-2">
-        <h2 className="font-medium">Rate your experience</h2>
+      <div className="space-y-3 rounded-2xl border border-line bg-paper p-5 shadow-sm">
+        <h2 className="font-serif text-lg font-semibold">Rate your experience</h2>
         {ratingSent ? (
-          <p className="text-sm text-gray-600">Thanks for your rating.</p>
+          <p className="text-sm text-muted">Thanks for your rating.</p>
         ) : (
           <>
             <select
               value={ratingScore}
               onChange={(e) => setRatingScore(Number(e.target.value))}
-              className="border rounded p-1"
+              className="rounded-lg border border-line bg-cream p-3 text-base"
             >
               {[1, 2, 3, 4, 5].map((n) => (
                 <option key={n} value={n}>
@@ -141,14 +143,14 @@ export function CustomerOrderActions({
             <textarea
               value={ratingComment}
               onChange={(e) => setRatingComment(e.target.value)}
-              className="border rounded p-1 w-full"
+              className="w-full rounded-lg border border-line bg-cream p-3 text-base"
               placeholder="Optional comment"
             />
             <button
               type="button"
               onClick={handleRating}
               disabled={isPending}
-              className="border rounded px-3 py-1 disabled:opacity-50"
+              className="w-full rounded-full border border-ink px-4 py-2.5 text-sm font-medium disabled:opacity-50"
             >
               Submit Rating
             </button>

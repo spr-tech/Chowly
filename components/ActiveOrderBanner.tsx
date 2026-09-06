@@ -22,8 +22,8 @@ export function ActiveOrderBanner() {
   }
 
   return (
-    <div className="border rounded p-3 bg-blue-50">
-      <Link href={`/orders/${activeOrderId}`} className="font-medium underline">
+    <div className="rounded-2xl border border-line bg-paper p-4 shadow-sm">
+      <Link href={`/orders/${activeOrderId}`} className="font-medium text-ink underline">
         View your current order
       </Link>
     </div>

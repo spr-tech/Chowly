@@ -35,20 +35,20 @@ export function StaffOrderActions({ orderId, staff }: { orderId: string; staff: 
   }
 
   return (
-    <div className="border rounded p-3 space-y-2">
-      <h2 className="font-medium">Assign staff and mark served</h2>
+    <div className="space-y-3 rounded-2xl border border-line bg-paper p-5 shadow-sm">
+      <h2 className="font-serif text-lg font-semibold">Assign staff and mark served</h2>
 
       <StaffSelect label="Waiter" value={waiterId} onChange={setWaiterId} options={waiters} />
       <StaffSelect label="Chef" value={chefId} onChange={setChefId} options={chefs} />
       <StaffSelect label="Bartender" value={bartenderId} onChange={setBartenderId} options={bartenders} />
 
-      {error && <p className="text-red-600 text-sm">{error}</p>}
+      {error && <p className="text-sm font-medium text-ink">{error}</p>}
 
       <button
         type="button"
         onClick={handleSubmit}
         disabled={isPending || !waiterId || !chefId || !bartenderId}
-        className="bg-black text-white rounded px-3 py-1 disabled:opacity-50"
+        className="w-full rounded-full bg-terracotta px-4 py-3 text-base font-semibold text-white shadow-sm disabled:opacity-50"
       >
         {isPending ? "Saving…" : "Mark Served"}
       </button>
@@ -68,7 +68,11 @@ function StaffSelect({
   options: StaffOption[];
 }) {
   return (
-    <select value={value} onChange={(e) => onChange(e.target.value)} className="border rounded p-1 w-full">
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full rounded-lg border border-line bg-cream p-3 text-base"
+    >
       <option value="">{label}…</option>
       {options.map((option) => (
         <option key={option.id} value={option.id}>

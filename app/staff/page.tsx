@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatNaira } from "@/lib/money";
+import { StatusBadge } from "@/components/StatusBadge";
 
 export default async function StaffDashboard() {
   const orders = await prisma.order.findMany({
@@ -10,11 +11,11 @@ export default async function StaffDashboard() {
   });
 
   return (
-    <main className="p-4 max-w-3xl mx-auto space-y-4">
-      <h1 className="text-xl font-semibold">Active Orders</h1>
+    <main className="mx-auto max-w-3xl space-y-4 p-4 pb-10">
+      <h1 className="font-serif text-2xl font-semibold">Active Orders</h1>
 
       {orders.length === 0 ? (
-        <p className="text-gray-500">No active orders.</p>
+        <p className="text-muted">No active orders.</p>
       ) : (
         <ul className="space-y-3">
           {orders.map((order) => {
@@ -23,12 +24,18 @@ export default async function StaffDashboard() {
               0,
             );
             return (
-              <li key={order.id} className="border rounded p-3">
-                <Link href={`/orders/${order.id}`} className="font-medium underline">
-                  Table {order.table.number} — {order.customer.name}
-                </Link>
-                <div className="text-sm text-gray-600">
-                  Status: {order.status} · {order.items.length} item(s) · {formatNaira(totalKobo)}
+              <li
+                key={order.id}
+                className="rounded-2xl border border-line bg-paper p-4 shadow-sm"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <Link href={`/orders/${order.id}`} className="font-medium underline">
+                    Table {order.table.number} — {order.customer.name}
+                  </Link>
+                  <StatusBadge status={order.status} />
+                </div>
+                <div className="mt-1 text-sm text-muted">
+                  {order.items.length} item(s) · {formatNaira(totalKobo)}
                 </div>
               </li>
             );

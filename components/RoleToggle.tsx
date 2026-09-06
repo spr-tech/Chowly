@@ -13,18 +13,22 @@ export function RoleToggle({ role }: { role: ViewerRole }) {
   }
 
   return (
-    <div className="flex gap-1 border rounded p-0.5 text-sm">
+    <div className="flex gap-1 rounded-full border border-line bg-paper p-1 text-sm">
       <button
         type="button"
         onClick={() => handleClick("customer")}
-        className={`px-3 py-1 rounded ${role === "customer" ? "bg-black text-white" : ""}`}
+        className={`rounded-full px-3 py-1.5 transition-colors ${
+          role === "customer" ? "bg-ink text-paper" : "text-muted"
+        }`}
       >
         Customer
       </button>
       <button
         type="button"
         onClick={() => handleClick("staff")}
-        className={`px-3 py-1 rounded ${role === "staff" ? "bg-black text-white" : ""}`}
+        className={`rounded-full px-3 py-1.5 transition-colors ${
+          role === "staff" ? "bg-ink text-paper" : "text-muted"
+        }`}
       >
         Staff
       </button>

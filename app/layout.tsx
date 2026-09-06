@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Lora } from "next/font/google";
 import { cookies } from "next/headers";
 import "./globals.css";
 import { RoleToggle } from "@/components/RoleToggle";
@@ -10,8 +10,8 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const lora = Lora({
+  variable: "--font-heading",
   subsets: ["latin"],
 });
 
@@ -26,16 +26,14 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const role = isViewerRole(roleCookie) ? roleCookie : DEFAULT_VIEWER_ROLE;
 
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
-        <header className="border-b p-3 flex items-center justify-between">
-          <span className="font-semibold">Chowly</span>
+    <html lang="en" className={`${geistSans.variable} ${lora.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col bg-cream font-sans text-ink">
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-paper px-4 py-3">
+          <span className="font-serif text-lg font-semibold">The Juniper Room</span>
           <RoleToggle role={role} />
         </header>
-        {children}
+        <div className="flex-1">{children}</div>
+        <footer className="py-6 text-center text-xs text-muted">Powered by Chowly</footer>
       </body>
     </html>
   );
