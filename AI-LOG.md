@@ -150,3 +150,57 @@ the wait-time math against seed data (Efo Riro 30 min + Zobo 3 min -> max(30,3) 
 ₦ totals.
 
 Rejected: none.
+
+## Deploy prep
+
+Asked: dashboard steps, which env vars, check the build, how to seed production. Ran `npm run
+build` before answering anything, rather than guessing:
+
+- `app/generated/prisma` is gitignored (Prisma writes it from the schema on demand), so a clean
+  Vercel checkout has no client until something generates one — confirmed by deleting it and
+  watching `next build` fail with "Module not found: Can't resolve '@/app/generated/prisma/client'".
+  Fixed with a `postinstall: "prisma generate"` script (Prisma's own recommended pattern for
+  Vercel), verified by deleting the client and re-running `npm install`.
+- Confirmed empirically, not assumed: `prisma generate` needs zero env vars (no DB connection at
+  all), the build succeeds even with a completely invalid `DATABASE_URL` (every route reads
+  `cookies()` so all four resolve to `ƒ (Dynamic)`, no DB access at build time), but the build
+  *fails* if `DATABASE_URL` is unset entirely — `lib/prisma.ts` constructs the client at module
+  scope, and Next's page-data-collection step imports every route during build. So: `DATABASE_URL`
+  must exist as a non-empty string at build time; `DIRECT_URL` isn't needed on Vercel at all (only
+  `prisma migrate`, run manually from a laptop, reads it).
+- Found and deleted a leftover row from my own earlier end-to-end test ("Test Customer E2E") in
+  the same Neon DB that's about to go live — asked the user first, since it's a database mutation,
+  not a local file.
+
+## Correction: role switch and refresh were destroying an unsubmitted order
+
+The user asked for an explanation first, no fix, then asked for the fix separately. The cause:
+cart/name/table lived only in `CustomerOrderFlow`'s `useState`, and the placed order's cuid only
+ever touched the URL bar — a role-switch `redirect()` (or a closed tab) discarded all of it, with
+nothing in the data model or cookies to reconnect a returning customer to their own order.
+
+Fixed in two commits, in the requested priority order:
+
+1. **Order continuity.** `placeOrder` had to stop calling `redirect()` itself — a server-side
+   redirect is a thrown control-flow exception that never lets the calling client code see a normal
+   return value, so there was no point after `await placeOrder(...)` where client code could ever
+   run to write `localStorage`. It now returns `{ orderId }`, and `CustomerOrderFlow` writes
+   `chowly_active_order` before calling `router.push()` itself. `ActiveOrderBanner` (new client
+   component — the server can't read `localStorage`) shows a "View your current order" link on the
+   landing page when that key is set; `CustomerOrderActions` clears it once `payOrder` succeeds.
+2. **Cart persistence.** `CustomerOrderFlow` mirrors `customerName`/`tableId`/`cart` to three
+   `localStorage` keys, restored in a `useEffect` on mount (never during render — the server and
+   React's first client render must match, or hydration throws). A `hasHydratedDraft` flag stops
+   the mirror effect from firing before the restore effect's `useEffect` has actually run — without
+   it, the mirror effect's first pass would write back the still-blank initial state and clobber
+   the very draft being restored, correcting itself a render later but for no good reason. Only the
+   cart clears on successful placement; name and table are kept for a possible next order.
+
+Verified with a second scripted Playwright pass, reusing the user's already-running dev server on
+port 3000 rather than starting a competing one (Next 16's dev lockfile refuses a second instance
+per project; Playwright's browser context is isolated from whatever the user has open, so sharing
+the server is safe): built a cart, switched Staff -> Customer, confirmed name/table/cart came back
+unchanged, confirmed a hard reload also survives, placed the order, confirmed the cart-only clear,
+returned to "/" and confirmed the banner linked to the exact right order id. Also noticed (and left
+untouched) a real in-progress order the user had placed themselves on their own dev server during
+this — cleaned up only the row my own script created, matched by its distinctive test name.
