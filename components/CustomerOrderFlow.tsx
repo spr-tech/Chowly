@@ -1,11 +1,18 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { placeOrder } from "@/app/actions/orders";
 import { formatNaira } from "@/lib/money";
 import { ACTIVE_ORDER_STORAGE_KEY } from "@/lib/storage";
 import { ActiveOrderBanner } from "@/components/ActiveOrderBanner";
+
+// Draft-cart keys: mirror the unsubmitted cart so a role-toggle navigation
+// or a refresh doesn't lose it. Cleared (cart only — name/table are kept for
+// convenience) once an order is actually placed.
+const DRAFT_CUSTOMER_NAME_KEY = "chowly_draft_customer_name";
+const DRAFT_TABLE_ID_KEY = "chowly_draft_table_id";
+const DRAFT_CART_KEY = "chowly_draft_cart";
 
 interface TableOption {
   id: number;
@@ -35,6 +42,42 @@ export function CustomerOrderFlow({
   const [cart, setCart] = useState<Record<number, number>>({});
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  // Server and first client render must match (both start blank) or React
+  // throws a hydration error, so the draft is only read back after mount.
+  const [hasHydratedDraft, setHasHydratedDraft] = useState(false);
+
+  useEffect(() => {
+    try {
+      const storedName = localStorage.getItem(DRAFT_CUSTOMER_NAME_KEY);
+      const storedTableId = localStorage.getItem(DRAFT_TABLE_ID_KEY);
+      const storedCart = localStorage.getItem(DRAFT_CART_KEY);
+      if (storedName) setCustomerName(storedName);
+      if (storedTableId) setTableId(storedTableId);
+      if (storedCart) setCart(JSON.parse(storedCart));
+    } catch {
+      // localStorage unavailable (private mode, etc.) — start with a blank draft
+    }
+    setHasHydratedDraft(true);
+  }, []);
+
+  // Mirror every change back to localStorage, but only once the restore
+  // above has run — otherwise this fires first, with the initial blank
+  // state, and overwrites the very draft we're about to restore.
+  useEffect(() => {
+    if (!hasHydratedDraft) return;
+    try {
+      localStorage.setItem(DRAFT_CUSTOMER_NAME_KEY, customerName);
+      if (tableId) {
+        localStorage.setItem(DRAFT_TABLE_ID_KEY, tableId);
+      } else {
+        localStorage.removeItem(DRAFT_TABLE_ID_KEY);
+      }
+      localStorage.setItem(DRAFT_CART_KEY, JSON.stringify(cart));
+    } catch {
+      // localStorage unavailable — the draft just won't survive a refresh
+    }
+  }, [customerName, tableId, cart, hasHydratedDraft]);
 
   const foodItems = menuItems.filter((item) => item.category === "FOOD");
   const drinkItems = menuItems.filter((item) => item.category === "DRINK");
@@ -68,6 +111,7 @@ export function CustomerOrderFlow({
 
       try {
         localStorage.setItem(ACTIVE_ORDER_STORAGE_KEY, result.orderId);
+        localStorage.removeItem(DRAFT_CART_KEY);
       } catch {
         // localStorage unavailable — the order still went through, the
         // customer just won't see the "view your current order" link later
