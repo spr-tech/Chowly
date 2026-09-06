@@ -57,3 +57,34 @@ fix path downgrades to `prisma@6.19.3`, which conflicts with the standing "never
 so left as-is.
 
 Rejected: none.
+
+## Phase 1: shared lib
+
+Asked: `lib/prisma.ts`, `lib/money.ts`, `lib/wait-time.ts`, `lib/role.ts`. Before writing
+`lib/prisma.ts`, asked me to justify `@prisma/adapter-pg` vs `@prisma/adapter-neon` for the Vercel
+runtime — Node vs Edge, pooled TCP vs serverless driver — rather than assume.
+
+Answered: staying with `@prisma/adapter-pg`. Server Actions run on Vercel's Node.js runtime by
+default, not Edge, so there's no need for `adapter-neon`'s WebSocket/HTTP transport (which exists
+specifically so Prisma can run somewhere raw TCP sockets aren't available, e.g. Edge/workerd).
+`DATABASE_URL` is already Neon's pooled endpoint, which is exactly what `adapter-pg`'s client-side
+`pg.Pool` is meant to sit in front of for a fleet of short-lived serverless invocations. Verified
+before answering: `@prisma/adapter-neon` isn't installed, and the generated client's own
+`internal/class.ts` confirmed Prisma 7 compiles queries to WASM (not the old Rust binary engine) —
+so the constraint really is about the DB transport, not the query engine.
+
+Built:
+- `lib/prisma.ts` — singleton `PrismaClient` with `PrismaPg`, pool `max: 5`, cached on
+  `globalThis` (guards against Next dev's hot-reload re-creating the pool on every save).
+- `lib/money.ts` — `formatNaira(kobo)`, e.g. `750000 → "₦7,500"`.
+- `lib/wait-time.ts` — `calculateEstimatedWaitMinutes(items, unpaidOrdersAheadCount)` implementing
+  the agreed formula as a pure function (no Prisma import) — the caller (a later server action)
+  is responsible for counting unpaid orders ahead, restaurant-wide.
+- `lib/role.ts` — `ViewerRole` type, cookie name constant, `isViewerRole` guard. No enforcement
+  logic: there's no auth session to check against, so the header toggle is presentation only, per
+  the "no auth" constraint.
+
+Verified: `npx tsc --noEmit` clean; manually ran `formatNaira` and `calculateEstimatedWaitMinutes`
+against real seed numbers before committing.
+
+Rejected: none.
