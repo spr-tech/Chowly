@@ -288,3 +288,57 @@ Cleanup note: test runs against the shared Neon DB left behind two "Hero Test" o
 name can legitimately belong to more than one row) — a `findFirst`-based cleanup caught only one of
 them; switched to `findMany` to catch both. Left two real orders the user placed on their own dev
 server during this session ("ade", "jay") completely untouched.
+
+## Data cleanup
+
+Asked directly: delete the "ade" (table 8) and "jay" (table 3) orders and their customers — the
+user's own testing, not seed data. Deleted both; left the seeded Restaurant/MenuItem/Staff/
+DiningTable rows untouched, confirmed by row count afterward (1/14/8/12).
+
+## Split the menu onto its own route
+
+Asked: pull the menu, cart, and Place Order off `/` entirely onto a new `/menu` route. `/` becomes
+hero-only, with "Start ordering" turning into a real button (validate both fields, write the
+session to localStorage, `router.push("/menu")`) instead of the in-page anchor scroll from the
+previous task. Two-route ceiling given as a guardrail against scope creep (explicitly: no `/pay`,
+no `/rate`) — only needed the one.
+
+Split `CustomerOrderFlow.tsx` into `LandingHero.tsx` (hero + form, on `/`) and `MenuOrderFlow.tsx`
+(everything menu-related, on the new `/menu`). The session (name, tableId, tableNumber) crosses the
+route boundary purely through three new `localStorage` keys in `lib/storage.ts` — there is still no
+server-side session of any kind, consistent with the app's no-auth design throughout. `/menu`'s
+Server Component fetches only `menuItems`, matching the instruction to read "exactly as / does
+today" — so the table *number* (not just its id) gets written to storage from `/` at click time,
+since `/menu` never queries `DiningTable` and has no other way to display "Table 7" in its session
+bar.
+
+The redirect-if-no-session logic is the one genuinely fiddly part: checking `!customerName ||
+!tableId` before the mount effect's localStorage read has landed would redirect every valid session
+too, since state starts blank on every render regardless of what's actually stored. Gated it behind
+a `hasCheckedSession` flag that only flips true after the restore effect's callback runs, and wrote
+that effect in the deferred-setState-in-a-setTimeout style proactively (rather than the naive
+synchronous version), since that's the exact pattern an editor auto-fix already applied to the old
+component's equivalent effect for `react-hooks/set-state-in-effect` — confirmed with `npx eslint .`
+that doing so upfront avoided reintroducing the same error.
+
+Rebuilt the menu view per spec: card grid (category label, serif name, description, price, prep
+time, one Add button — no on-card quantity display, matching the spec's card contents literally),
+Food/Drinks pill tabs, and a floating "Your order · N" button opening a bottom-sheet cart drawer
+where quantity adjustment and Place Order now live (previously always inline).
+
+Verified end-to-end with Playwright at 390px and 1280px, zero console errors, against every point
+raised: name/table survive `/` -> `/menu`, a refresh of `/menu` keeps both session and cart, an
+empty-localStorage visit to `/menu` bounces to `/`, a full order placement still completes, the
+role toggle works from both pages (bonus: session and cart both survive that round trip too, since
+neither ever gets cleared by navigating away), and `document.documentElement.scrollWidth` matches
+`clientWidth` at both widths on both pages.
+
+Noticed, flagged, not reverted: `HeroIllustration.tsx`'s blobs picked up a `hidden md:block` class
+between my last read of that file and this task (not a change I made) — the illustration no longer
+renders at all below the `md` breakpoint, which contradicts the earlier "~280px on mobile" spec.
+Left it as the current state per instructions rather than guessing at intent and reverting it.
+
+Cleanup: deleted the one test order ("Split Test") this task's verification created. A second
+screenshot script filled the name field with "Ada" but never clicked Place Order, so it left no row
+behind — checked before deleting anything under that name, since it's also the input's own
+placeholder text and could plausibly collide with real data later.
