@@ -1,0 +1,194 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum StaffRole {
+  WAITER
+  CHEF
+  BARTENDER
+}
+
+enum MenuCategory {
+  FOOD
+  DRINK
+}
+
+enum OrderStatus {
+  PLACED
+  PREPARING
+  SERVED
+  PAID
+}
+
+
+// Seeded, single row ("The Juniper Room"). Int id: never exposed in a URL.
+
+
+model Restaurant {
+  id      Int    @id @default(autoincrement())
+  name    String
+  address String
+
+  menuItems MenuItem[]
+  staff     Staff[]
+  tables    DiningTable[]
+}
+
+
+// Seeded. isAvailable lets an item be hidden from the menu without deleting it,
+// so past OrderItems still reference a row that exists.
+
+
+model MenuItem {
+  id              Int          @id @default(autoincrement())
+  restaurantId    Int
+  restaurant      Restaurant   @relation(fields: [restaurantId], references: [id])
+  name            String
+  description     String?
+  category        MenuCategory
+  priceKobo       Int
+  prepTimeMinutes Int
+  isAvailable     Boolean      @default(true)
+
+  orderItems OrderItem[]
+}
+
+
+
+// Seeded. Three named relations because Order references Staff three times.
+
+model Staff {
+  id           Int        @id @default(autoincrement())
+  restaurantId Int
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  name         String
+  role         StaffRole
+
+  ordersAsWaiter    Order[] @relation("OrderWaiter")
+  ordersAsChef      Order[] @relation("OrderChef")
+  ordersAsBartender Order[] @relation("OrderBartender")
+}
+
+// Seeded. The customer reaches a table via /t/[number], where `number` is the
+// human-facing table number, not this id.
+
+
+model DiningTable {
+  id           Int        @id @default(autoincrement())
+  restaurantId Int
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  number       Int
+
+  orders Order[]
+
+  @@unique([restaurantId, number])
+}
+
+
+
+// Created ad hoc when someone starts ordering. No auth, so this is a name only.
+
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  orders Order[]
+}
+
+model Order {
+  id         String      @id @default(cuid())
+  tableId    Int
+  table      DiningTable @relation(fields: [tableId], references: [id])
+  customerId String
+  customer   Customer    @relation(fields: [customerId], references: [id])
+  status     OrderStatus @default(PLACED)
+
+  // Null until the waiter records them.
+  waiterId    Int?
+  waiter      Staff? @relation("OrderWaiter", fields: [waiterId], references: [id])
+  chefId      Int?
+  chef        Staff? @relation("OrderChef", fields: [chefId], references: [id])
+  bartenderId Int?
+  bartender   Staff? @relation("OrderBartender", fields: [bartenderId], references: [id])
+
+  // Snapshot of the estimate quoted at placement, not recalculated later:
+  // the customer was told a number and it should not move under them.
+  estimatedWaitMinutes Int
+
+  // placedAt and servedAt bracket the wait. The gap between them is what
+  // justifies a complaint. servedAt is null until the waiter marks it served.
+
+
+  placedAt DateTime  @default(now())
+  servedAt DateTime?
+
+  items     OrderItem[]
+  complaint Complaint?
+  rating    Rating?
+  payment   Payment?
+
+  // A table is occupied by any of its orders where status != PAID. Derived from
+  // this index rather than a stored boolean, so it can never drift out of sync.
+  @@index([tableId, status])
+  @@index([placedAt])
+}
+
+// nameSnapshot + unitPriceKobo freeze the sale even if the menu changes later.
+// No totalKobo on Order: summing these lines gives the same number every time.
+
+
+model OrderItem {
+  id            String   @id @default(cuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId    Int
+  menuItem      MenuItem @relation(fields: [menuItemId], references: [id])
+  nameSnapshot  String
+  unitPriceKobo Int
+  quantity      Int
+}
+
+// @unique on orderId makes this 1:1 — one complaint per order, enforced by the
+// database rather than by application code.
+
+
+model Complaint {
+  id        String   @id @default(cuid())
+  orderId   String   @unique
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  message   String
+  createdAt DateTime @default(now())
+}
+
+
+// 1:1 with Order.
+
+
+model Rating {
+  id        String   @id @default(cuid())
+  orderId   String   @unique
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  score     Int
+  comment   String?
+  createdAt DateTime @default(now())
+}
+
+// 1:1 with Order. Simulated payment: recorded for real in the database,
+// labelled as pretend in the UI (button copy and receipt), never routed to a
+// real processor. No isPretend column — every payment here is simulated, so a
+// column that is always true carries no information.
+
+model Payment {
+  id         String   @id @default(cuid())
+  orderId    String   @unique
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amountKobo Int
+  paidAt     DateTime @default(now())
+}
