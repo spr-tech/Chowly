@@ -33,3 +33,10 @@ body {
   background: var(--cream);
   color: var(--ink);
 }
+
+/* Native in-page anchor scroll for the hero's "Start ordering" link
+   (a plain <a href="#menu">, not a route change — Next's router isn't
+   involved, so this is the only thing needed to animate it). */
+html {
+  scroll-behavior: smooth;
+}
