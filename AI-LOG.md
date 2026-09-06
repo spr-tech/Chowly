@@ -242,3 +242,49 @@ Flagged, not fixed (logic, not styling, so out of scope for this pass): `npx esl
 `react-hooks/set-state-in-effect` on the two localStorage-restore effects added in the previous
 turn (`CustomerOrderFlow`, `ActiveOrderBanner`). Confirmed via `git stash` that this predates this
 commit entirely — it's a leftover from the order-continuity work, not introduced here.
+
+## Landing page hero
+
+Asked: add a two-column editorial hero above the existing menu — eyebrow pill, big serif headline
+("Good food." ink / "No fuss." terracotta) with a hand-drawn underline stroke, the existing
+name+table form relocated into the hero's card, a "Start ordering" link that scrolls to the menu
+without navigating or submitting anything, and a five-blob CSS illustration. No routes, actions, or
+schema — the menu/cart/Place Order flow had to stay exactly where it functionally was.
+
+Built `components/HeroIllustration.tsx` (new, stateless, `aria-hidden`) and restructured
+`CustomerOrderFlow.tsx`'s JSX only — none of its state, effects, or `handleSubmit` logic changed;
+the name/table form fields kept their exact ids, so the draft-persistence effects from two turns
+ago still target the same inputs. "Start ordering" is a plain `<a href="#menu">`, deliberately not
+`next/link`'s `<Link>` and not a `<button>` — a bare anchor can never submit a form regardless of
+nesting, and a same-document hash href never enters Next's router at all, so "doesn't navigate" and
+"doesn't submit" were both satisfied by the choice of tag rather than by extra guard logic. Added
+`scroll-behavior: smooth` to `<html>` in globals.css for the actual animation (confirmed this is
+unrelated to Next 16's `data-scroll-behavior` opt-in mentioned in its docs, which only governs
+route-transition scroll resets, not in-page anchors).
+
+First pass at the five concentric blobs read too close to a "loading spinner" — the exact trap
+called out in the brief. Fixed by pushing the border-radius corner spread and per-layer rotation
+much further apart than the initial values; also stepped the five sizes down unevenly
+(100/76/57/41/27%) so the innermost terracotta blob reads as the largest *solid* mass despite being
+the smallest individual layer.
+
+Verified: `tsc --noEmit` clean. Scripted Playwright pass at 390px (the specified overflow-check
+width) and 1280px — zero horizontal overflow at either, confirmed via `document.documentElement.
+scrollWidth` vs `clientWidth` rather than eyeballing a screenshot. Hit one real bug in the test
+script itself, not the app: `element.getAttribute("disabled")` returns `""` for a genuinely
+disabled option, and `!""` is `true` in JS, so the "pick a free table" loop was silently treating
+occupied tables as available — fixed the check to compare against `null` instead of relying on
+truthiness, then reran and got a clean pass including a full order placement through the
+restructured hero form.
+
+Also noticed, unprompted: the editor had already auto-fixed the `react-hooks/set-state-in-effect`
+error in this file's draft-restore effect (visible as a disk change between my read and my next
+edit) — took it as the current state per instructions rather than reverting it, since it changes
+nothing observable and resolves a lint error flagged two turns ago as out-of-scope-for-now.
+`ActiveOrderBanner.tsx` still has the identical unfixed error.
+
+Cleanup note: test runs against the shared Neon DB left behind two "Hero Test" orders under
+*separate* Customer rows (the app creates a fresh ad-hoc Customer per order by design, so the same
+name can legitimately belong to more than one row) — a `findFirst`-based cleanup caught only one of
+them; switched to `findMany` to catch both. Left two real orders the user placed on their own dev
+server during this session ("ade", "jay") completely untouched.
