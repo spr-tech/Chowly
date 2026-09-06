@@ -24,6 +24,124 @@ interface MenuItemOption {
 }
 
 type Category = "FOOD" | "DRINK";
+type IconProps = { className?: string };
+
+function ForkKnifeIcon({ className }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M6 2v6a2 2 0 0 0 4 0V2" />
+      <path d="M8 8v14" />
+      <path d="M18 2c-2 0-3 2-3 5s1 5 3 5" />
+      <path d="M18 12v10" />
+    </svg>
+  );
+}
+
+function ShoppingBagIcon({ className }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M6 8h12l-1 12a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1L6 8Z" />
+      <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+    </svg>
+  );
+}
+
+function ClockIcon({ className }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 3" />
+    </svg>
+  );
+}
+
+function CheckIcon({ className }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M5 13l4 4L19 7" />
+    </svg>
+  );
+}
+
+function PlusIcon({ className }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  );
+}
+
+function TrashIcon({ className }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M4 7h16" />
+      <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+      <path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13" />
+      <path d="M10 11v6M14 11v6" />
+    </svg>
+  );
+}
+
+function CategoryIcon({ category, className }: { category: Category; className?: string }) {
+  return category === "FOOD" ? (
+    <ForkKnifeIcon className={className} />
+  ) : (
+    <ShoppingBagIcon className={className} />
+  );
+}
 
 export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
   const router = useRouter();
@@ -135,6 +253,103 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
     return null;
   }
 
+  if (isCartOpen) {
+    return (
+      <main className="mx-auto max-w-5xl space-y-6 p-4 py-8 sm:p-8">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold tracking-wide text-terracotta uppercase">
+              Table {tableNumber}
+            </p>
+            <h1 className="font-serif text-4xl font-bold sm:text-5xl">Your order.</h1>
+            <p className="mt-1 text-sm text-muted">For {customerName}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsCartOpen(false)}
+            className={`flex items-center gap-2 rounded-full border border-line bg-paper px-4 py-2 text-sm font-semibold shadow-sm ${FOCUS_RING_CLASSES}`}
+          >
+            <span aria-hidden="true">←</span> Add more
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_1fr]">
+          <div className="rounded-2xl border border-line bg-paper p-5 shadow-sm">
+            <h2 className="mb-3 font-serif text-xl font-semibold">At the table</h2>
+            {cartLines.length === 0 ? (
+              <p className="text-sm text-muted">No items yet.</p>
+            ) : (
+              <ul className="divide-y divide-line">
+                {cartLines.map((line) => (
+                  <li key={line.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                    <div>
+                      <p className="font-medium">{line.name}</p>
+                      <p className="text-xs text-muted">{formatNaira(line.priceKobo)} each</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setQuantity(line.id, line.quantity - 1)}
+                          className={`flex h-8 w-8 items-center justify-center rounded-full border border-line ${FOCUS_RING_CLASSES}`}
+                          aria-label={`Remove one ${line.name}`}
+                        >
+                          −
+                        </button>
+                        <span className="w-4 text-center">{line.quantity}</span>
+                        <button
+                          type="button"
+                          onClick={() => setQuantity(line.id, line.quantity + 1)}
+                          className={`flex h-8 w-8 items-center justify-center rounded-full border border-line ${FOCUS_RING_CLASSES}`}
+                          aria-label={`Add one ${line.name}`}
+                        >
+                          +
+                        </button>
+                      </div>
+                      <span className="w-24 text-right font-bold text-terracotta">
+                        {formatNaira(line.priceKobo * line.quantity)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setQuantity(line.id, 0)}
+                        aria-label={`Remove ${line.name} from order`}
+                        className={`text-muted ${FOCUS_RING_CLASSES}`}
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="space-y-4 rounded-2xl bg-ink p-6 text-paper shadow-sm">
+            <p className="text-xs font-semibold tracking-wide text-saffron uppercase">Almost there</p>
+            <h2 className="font-serif text-2xl font-bold">Ready when you are.</h2>
+            <p className="text-sm text-paper/70">
+              We&apos;ll send this straight to the kitchen. You can watch your order&apos;s progress
+              from the confirmation page next.
+            </p>
+            <div className="flex items-center justify-between border-t border-paper/20 pt-4">
+              <span>Subtotal</span>
+              <span className="text-lg font-bold text-saffron">{formatNaira(totalKobo)}</span>
+            </div>
+            {error && <p className="text-sm font-medium text-saffron">{error}</p>}
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isPending || cartLines.length === 0}
+              className={`w-full rounded-full bg-saffron px-4 py-3 text-base font-semibold text-ink disabled:opacity-50 ${FOCUS_RING_CLASSES}`}
+            >
+              {isPending ? "Placing order…" : "Place Order →"}
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="mx-auto max-w-3xl space-y-6 p-4 pb-24">
       <div className="flex items-center justify-between text-sm text-muted">
@@ -171,23 +386,37 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
         {items.map((item) => (
           <div
             key={item.id}
-            className="flex flex-col gap-2 rounded-2xl border border-line bg-paper p-4 shadow-sm"
+            className="flex flex-col gap-3 rounded-2xl border border-line bg-paper p-4 shadow-sm"
           >
-            <span className="text-xs font-semibold tracking-wide text-muted uppercase">
-              {item.category}
-            </span>
-            <h3 className="font-serif text-lg font-semibold">{item.name}</h3>
-            {item.description && <p className="text-sm text-muted">{item.description}</p>}
-            <p className="text-sm text-muted">
-              {formatNaira(item.priceKobo)} · ~{item.prepTimeMinutes} min
-            </p>
-            <button
-              type="button"
-              onClick={() => setQuantity(item.id, (cart[item.id] ?? 0) + 1)}
-              className={`mt-auto rounded-full bg-terracotta px-4 py-2 text-sm font-semibold text-white ${FOCUS_RING_CLASSES}`}
-            >
-              Add
-            </button>
+            <div className="flex items-start justify-between gap-2">
+              <span className="text-xs font-semibold tracking-wide text-muted uppercase">
+                {item.category}
+              </span>
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-saffron text-ink">
+                <CategoryIcon category={item.category} className="h-4 w-4" />
+              </span>
+            </div>
+
+            <div className="space-y-1">
+              <h3 className="font-serif text-lg font-semibold">{item.name}</h3>
+              {item.description && <p className="text-sm text-muted">{item.description}</p>}
+            </div>
+
+            <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-2">
+              <span className="text-lg font-bold text-terracotta">{formatNaira(item.priceKobo)}</span>
+              <span className="flex items-center gap-1 text-xs text-muted">
+                <ClockIcon className="h-3.5 w-3.5" />
+                {item.prepTimeMinutes} MIN
+              </span>
+              <button
+                type="button"
+                onClick={() => setQuantity(item.id, (cart[item.id] ?? 0) + 1)}
+                className={`flex items-center gap-1 rounded-full bg-ink px-3 py-1.5 text-sm font-semibold text-paper ${FOCUS_RING_CLASSES}`}
+              >
+                <PlusIcon className="h-3.5 w-3.5" />
+                Add
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -195,79 +424,15 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
       <button
         type="button"
         onClick={() => setIsCartOpen(true)}
-        className={`fixed right-4 bottom-4 z-20 rounded-full bg-terracotta px-5 py-3 text-base font-semibold text-white shadow-lg sm:right-8 sm:bottom-8 ${FOCUS_RING_CLASSES}`}
+        className={`fixed right-4 bottom-4 z-20 flex items-center gap-2 rounded-full bg-terracotta px-5 py-3 text-base font-semibold text-white shadow-lg sm:right-8 sm:bottom-8 ${FOCUS_RING_CLASSES}`}
       >
-        Your order · {totalQuantity}
+        <ShoppingBagIcon className="h-5 w-5" />
+        Your order
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-paper text-sm font-bold text-terracotta">
+          {totalQuantity}
+        </span>
+        <CheckIcon className="h-5 w-5" />
       </button>
-
-      {isCartOpen && (
-        <div
-          className="fixed inset-0 z-30 flex items-end justify-center bg-ink/40 sm:items-center"
-          onClick={() => setIsCartOpen(false)}
-        >
-          <div
-            className="w-full max-w-md space-y-3 rounded-t-2xl bg-paper p-5 shadow-lg sm:rounded-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between">
-              <h2 className="font-serif text-lg font-semibold">Your order</h2>
-              <button
-                type="button"
-                onClick={() => setIsCartOpen(false)}
-                aria-label="Close"
-                className={`rounded-full px-2 text-xl leading-none text-muted ${FOCUS_RING_CLASSES}`}
-              >
-                ×
-              </button>
-            </div>
-
-            {cartLines.length === 0 ? (
-              <p className="text-sm text-muted">No items yet.</p>
-            ) : (
-              <ul className="divide-y divide-line">
-                {cartLines.map((line) => (
-                  <li key={line.id} className="flex items-center justify-between gap-2 py-2">
-                    <span className="flex-1">{line.name}</span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setQuantity(line.id, line.quantity - 1)}
-                        className="flex h-8 w-8 items-center justify-center rounded-full border border-line"
-                        aria-label={`Remove one ${line.name}`}
-                      >
-                        −
-                      </button>
-                      <span className="w-4 text-center">{line.quantity}</span>
-                      <button
-                        type="button"
-                        onClick={() => setQuantity(line.id, line.quantity + 1)}
-                        className="flex h-8 w-8 items-center justify-center rounded-full border border-line"
-                        aria-label={`Add one ${line.name}`}
-                      >
-                        +
-                      </button>
-                    </div>
-                    <span className="w-20 text-right">{formatNaira(line.priceKobo * line.quantity)}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            <div className="text-right font-semibold">Total: {formatNaira(totalKobo)}</div>
-
-            {error && <p className="text-sm font-medium text-ink">{error}</p>}
-
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={isPending || cartLines.length === 0}
-              className={`w-full rounded-full bg-terracotta px-4 py-3 text-base font-semibold text-white shadow-sm disabled:opacity-50 ${FOCUS_RING_CLASSES}`}
-            >
-              {isPending ? "Placing order…" : "Place Order"}
-            </button>
-          </div>
-        </div>
-      )}
     </main>
   );
 }
