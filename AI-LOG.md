@@ -88,3 +88,13 @@ Verified: `npx tsc --noEmit` clean; manually ran `formatNaira` and `calculateEst
 against real seed numbers before committing.
 
 Rejected: none.
+
+## Correction: wait-time queue term was mis-scoped
+
+Corrected by the user: the second parameter of `calculateEstimatedWaitMinutes` was named
+`unpaidOrdersAheadCount`, but the rule is "orders still ahead in the kitchen/bar" — a SERVED order
+is unpaid but has already left the kitchen, so it shouldn't inflate anyone else's estimate.
+Renamed to `activeOrdersAheadCount` and rewrote the doc comment to spell out that "active" means
+`status IN (PLACED, PREPARING)`, not `status != PAID`. No query existed yet to fix (that lands
+with the order-placement server action in a later phase) — the comment is the guardrail for
+writing it correctly then.
