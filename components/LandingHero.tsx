@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ActiveOrderBanner } from "@/components/ActiveOrderBanner";
+import { ActiveOrderBanner, type ActiveOrderInfo } from "@/components/ActiveOrderBanner";
 import { HeroIllustration } from "@/components/HeroIllustration";
 import { FOCUS_RING_CLASSES } from "@/lib/styles";
 import {
@@ -47,6 +47,18 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
   const [customerName, setCustomerName] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  // "checking": ActiveOrderBanner hasn't reported back yet. null: no active
+  // order. Otherwise: the order to lead with. formExpanded lets a returning
+  // customer reach the form anyway via "Start a new order".
+  const [activeOrder, setActiveOrder] = useState<ActiveOrderInfo | null | "checking">("checking");
+  const [formExpanded, setFormExpanded] = useState(false);
+
+  const handleActiveOrderChange = useCallback((info: ActiveOrderInfo | null) => {
+    setActiveOrder(info);
+  }, []);
+
+  const showForm = activeOrder === null || formExpanded;
+
   function handleStartOrdering() {
     const trimmedName = customerName.trim();
     if (!trimmedName) {
@@ -76,7 +88,7 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
     <main>
       <section className="bg-cream">
         <div className="mx-auto max-w-[1200px] px-4 py-12 md:py-20">
-          <ActiveOrderBanner />
+          <ActiveOrderBanner onChange={handleActiveOrderChange} />
 
           <div className="mt-6 grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
             <div className="space-y-6">
@@ -104,53 +116,65 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
 
               <p className="text-base text-muted">Good food. Easy moments.</p>
 
-              <div className="space-y-4 rounded-2xl border border-line bg-paper p-5 shadow-sm">
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <div className="flex-1 space-y-2">
-                    <label className="block text-sm font-medium" htmlFor="customerName">
-                      Your name
-                    </label>
-                    <input
-                      id="customerName"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      className={`w-full rounded-lg border border-line bg-cream p-3 text-base ${FOCUS_RING_CLASSES}`}
-                      placeholder="e.g. Ada"
-                    />
+              {showForm ? (
+                <div className="space-y-4 rounded-2xl border border-line bg-paper p-5 shadow-sm">
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <div className="flex-1 space-y-2">
+                      <label className="block text-sm font-medium" htmlFor="customerName">
+                        Your name
+                      </label>
+                      <input
+                        id="customerName"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        className={`w-full rounded-lg border border-line bg-cream p-3 text-base ${FOCUS_RING_CLASSES}`}
+                        placeholder="e.g. Ada"
+                      />
+                    </div>
+
+                    <div className="space-y-2 sm:w-40">
+                      <label className="block text-sm font-medium" htmlFor="table">
+                        Table
+                      </label>
+                      <select
+                        id="table"
+                        value={tableId}
+                        onChange={(e) => setTableId(e.target.value)}
+                        className={`w-full rounded-lg border border-line bg-cream p-3 text-base ${FOCUS_RING_CLASSES}`}
+                      >
+                        <option value="">Select…</option>
+                        {tables.map((table) => (
+                          <option key={table.id} value={table.id} disabled={table.occupied}>
+                            Table {table.number}
+                            {table.occupied ? " (occupied)" : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
-                  <div className="space-y-2 sm:w-40">
-                    <label className="block text-sm font-medium" htmlFor="table">
-                      Table
-                    </label>
-                    <select
-                      id="table"
-                      value={tableId}
-                      onChange={(e) => setTableId(e.target.value)}
-                      className={`w-full rounded-lg border border-line bg-cream p-3 text-base ${FOCUS_RING_CLASSES}`}
-                    >
-                      <option value="">Select…</option>
-                      {tables.map((table) => (
-                        <option key={table.id} value={table.id} disabled={table.occupied}>
-                          Table {table.number}
-                          {table.occupied ? " (occupied)" : ""}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  {error && <p className="text-sm font-medium text-ink">{error}</p>}
+
+                  <button
+                    type="button"
+                    onClick={handleStartOrdering}
+                    className={`flex w-full items-center justify-center gap-2 rounded-full bg-terracotta px-4 py-3 text-base font-semibold text-white shadow-sm ${FOCUS_RING_CLASSES}`}
+                  >
+                    Start ordering
+                    <span aria-hidden="true">→</span>
+                  </button>
                 </div>
-
-                {error && <p className="text-sm font-medium text-ink">{error}</p>}
-
-                <button
-                  type="button"
-                  onClick={handleStartOrdering}
-                  className={`flex w-full items-center justify-center gap-2 rounded-full bg-terracotta px-4 py-3 text-base font-semibold text-white shadow-sm ${FOCUS_RING_CLASSES}`}
-                >
-                  Start ordering
-                  <span aria-hidden="true">→</span>
-                </button>
-              </div>
+              ) : (
+                activeOrder !== "checking" && (
+                  <button
+                    type="button"
+                    onClick={() => setFormExpanded(true)}
+                    className={`w-full rounded-full border border-ink px-4 py-2.5 text-sm font-medium ${FOCUS_RING_CLASSES}`}
+                  >
+                    Start a new order
+                  </button>
+                )
+              )}
 
               <p className="flex items-center gap-1.5 text-sm text-muted">
                 <PinIcon />

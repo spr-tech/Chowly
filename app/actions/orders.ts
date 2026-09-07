@@ -100,6 +100,22 @@ export async function placeOrder(input: PlaceOrderInput): Promise<{ error: strin
   return { orderId };
 }
 
+// Read-only — used by ActiveOrderBanner to verify a localStorage-remembered
+// order is still real and still unpaid before showing it. Deliberately a
+// separate function from the mutating actions above; it changes nothing.
+export async function getActiveOrderSummary(
+  orderId: string,
+): Promise<{ status: "PLACED" | "SERVED" | "PAID"; tableNumber: number } | null> {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    select: { status: true, table: { select: { number: true } } },
+  });
+  if (!order) {
+    return null;
+  }
+  return { status: order.status, tableNumber: order.table.number };
+}
+
 interface AssignStaffInput {
   waiterId: number;
   chefId: number;
