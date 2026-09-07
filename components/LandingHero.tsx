@@ -111,19 +111,28 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
   return (
     <main>
       <section className="bg-cream">
-        <div className="mx-auto max-w-[1200px] px-4 py-12 md:py-20">
+        <div className="mx-auto max-w-7xl px-4 py-12 md:py-20">
           <ActiveOrderBanner onChange={handleActiveOrderChange} />
 
-          <div className="mt-6 grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
+          <div className="mt-6 grid grid-cols-1 items-center gap-20 lg:grid-cols-2 lg:gap-20">
             <div className="space-y-6">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-saffron/30 px-3 py-1 text-xs font-semibold text-ink">
                 <SparkleIcon />
                 Your table, your space
               </span>
-              <h1 className="font-serif leading-[1.05] font-semibold sm:text-5xl md:text-6xl lg:text-7xl">
-                <span className="block text-ink font-extrabold  text-7xl">
-                  Good food.
-                </span>
+              <h1
+                className="
+    max-w-100
+    my-[22px_0_25px]
+    font-serif
+    text-[clamp(58px,4.5vw+1rem,80px)]
+    font-bold
+    leading-[0.98]
+    tracking-[-0.045em]
+  "
+              >
+                <span className="block text-ink">Good food.</span>
+
                 <span className="relative inline-block text-terracotta">
                   No fuss.
                   <svg
@@ -138,9 +147,9 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
                   </svg>
                 </span>
               </h1>
-              <p className="font-serif text-lg md:text-xl text-muted italic tracking-wide">
+              <p className="font-serif text-md md:text-xl text-muted tracking-wide">
                 Good food. Easy moments.
-              </p>{" "}
+              </p>
               {showForm ? (
                 <div className="space-y-4 rounded-2xl border border-line bg-paper p-5 shadow-sm">
                   <div className="flex flex-col gap-3 sm:flex-row">

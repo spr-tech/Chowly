@@ -48,7 +48,7 @@ export function HeroIllustration() {
   return (
     <div
       aria-hidden="true"
-      className="relative mx-auto aspect-square w-full max-w-[520px] mb-9"
+      className="relative mx-auto aspect-square hidden lg:block w-full max-w-[520px] mb-9"
     >
       {/* Clipped frame containing the five layers */}
       <div className="absolute inset-0 overflow-hidden rounded-[2rem]">
@@ -68,7 +68,7 @@ export function HeroIllustration() {
       </div>
 
       {/* Overlapping lower-left informational note */}
-      <div className="absolute -bottom-8 -left-6 w-48 -rotate-8 rounded-xl bg-[#FFFDF9] p-4 shadow-lg border border-[#E8DED2]">
+      <div className="absolute bottom-8 left-8 w-48 -rotate-8 rounded-xl bg-[#FFFDF9] p-4 shadow-lg border border-[#E8DED2]">
         <p className="text-[10px] font-semibold tracking-widest text-[#E6532B] uppercase font-mono">
           CHOWLY PROMISE
         </p>
