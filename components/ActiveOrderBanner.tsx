@@ -84,12 +84,14 @@ export function ActiveOrderBanner({
       </p>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <p className="font-serif text-xl font-semibold">Table {activeOrder.tableNumber}</p>
+          <p className="font-serif text-xl font-semibold">
+            Table {activeOrder.tableNumber}
+          </p>
           <StatusBadge status={activeOrder.status} />
         </div>
         <Link
           href={`/orders/${activeOrder.orderId}`}
-          className="rounded-full bg-terracotta px-4 py-2 text-sm font-semibold text-white"
+          className="bg-terracotta text-white rounded-full border px-4 py-2.5 text-sm font-medium transition-transform duration-150 hover:cursor-pointer active:scale-[.91] disabled:cursor-not-allowed disabled:opacity-50 shadow-[0_4px_0_0_#B8401E]"
         >
           View order →
         </Link>

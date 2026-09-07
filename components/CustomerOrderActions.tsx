@@ -46,6 +46,7 @@ export function CustomerOrderActions({
   const [complaintSent, setComplaintSent] = useState(hasComplaint);
 
   const [ratingScore, setRatingScore] = useState(0);
+  const [hoveredStar, setHoveredStar] = useState(0); // 0 = nothing hovered
   const [ratingComment, setRatingComment] = useState("");
   const [ratingSent, setRatingSent] = useState(hasRating);
 
@@ -104,21 +105,26 @@ export function CustomerOrderActions({
             SIMULATED PAYMENT — not a real transaction
           </p>
           <p className="text-sm text-ink">
-            Paid {formatNaira(payment.amountKobo)} on {new Date(payment.paidAt).toLocaleString()}
+            Paid {formatNaira(payment.amountKobo)} on{" "}
+            {new Date(payment.paidAt).toLocaleString()}
           </p>
         </div>
       ) : (
         status === "SERVED" && (
           <div className="space-y-3 rounded-2xl border border-line bg-paper p-5 shadow-sm">
             <p className="text-base">Total due: {formatNaira(totalKobo)}</p>
-            {payError && <p className="text-sm font-medium text-ink">{payError}</p>}
+            {payError && (
+              <p className="text-sm font-medium text-ink">{payError}</p>
+            )}
             <button
               type="button"
               onClick={handlePay}
               disabled={isPaying}
               className="w-full rounded-full bg-terracotta px-4 py-3 text-base font-semibold text-white shadow-sm disabled:opacity-50"
             >
-              {isPaying ? "Paying…" : `Pretend to Pay ${formatNaira(totalKobo)} (Simulated)`}
+              {isPaying
+                ? "Paying…"
+                : `Pretend to Pay ${formatNaira(totalKobo)} (Simulated)`}
             </button>
           </div>
         )
@@ -140,7 +146,7 @@ export function CustomerOrderActions({
               type="button"
               onClick={handleComplaint}
               disabled={isSubmittingComplaint || !complaintMessage.trim()}
-              className="w-full rounded-full border border-ink px-4 py-2.5 text-sm font-medium disabled:opacity-50"
+              className="bg-terracotta text-white rounded-full border px-4 py-2.5 text-sm font-medium transition-transform duration-150 hover:cursor-pointer active:scale-[.91] disabled:cursor-not-allowed disabled:opacity-50 shadow-[0_4px_0_0_#B8401E]"
             >
               {isSubmittingComplaint ? "Submitting…" : "Submit Complaint"}
             </button>
@@ -149,23 +155,43 @@ export function CustomerOrderActions({
       </div>
 
       <div className="space-y-3 rounded-2xl border border-line bg-paper p-5 shadow-sm">
-        <h2 className="font-serif text-lg font-semibold">Rate your experience</h2>
+        <h2 className="font-serif text-lg font-semibold">
+          Rate your experience
+        </h2>
         {ratingSent ? (
           <p className="text-sm text-muted">Thanks for your rating.</p>
         ) : (
           <>
-            <select
-              value={ratingScore}
-              onChange={(e) => setRatingScore(Number(e.target.value))}
-              className="rounded-lg border border-line bg-cream p-3 text-base"
-            >
-              <option value={0}>Select a rating…</option>
-              {[1, 2, 3, 4, 5].map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
+            <div className="flex gap-1" onMouseLeave={() => setHoveredStar(0)}>
+              {[1, 2, 3, 4, 5].map((n) => {
+                // While hovering, the hover value wins so the preview lights
+                // up; once the mouse leaves, hoveredStar resets to 0 and this
+                // falls back to showing whatever was actually clicked.
+                const filled = n <= (hoveredStar || ratingScore);
+                return (
+                  <button
+                    key={n}
+                    type="button"
+                    onMouseEnter={() => setHoveredStar(n)}
+                    onClick={() => setRatingScore(n)}
+                    aria-label={`Rate ${n} star${n > 1 ? "s" : ""}`}
+                    className="p-0.5"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      className={`h-8 w-8 ${
+                        filled
+                          ? "fill-yellow-400 stroke-yellow-400"
+                          : "fill-none stroke-line"
+                      }`}
+                      strokeWidth={1.5}
+                    >
+                      <path d="M12 2.5l2.9 6.4 6.9.7-5.2 4.7 1.5 6.9L12 17.6 5.9 21.2l1.5-6.9-5.2-4.7 6.9-.7L12 2.5z" />
+                    </svg>
+                  </button>
+                );
+              })}
+            </div>
             <textarea
               value={ratingComment}
               onChange={(e) => setRatingComment(e.target.value)}
