@@ -236,6 +236,7 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
                   <button
                     type="button"
                     onClick={() => setFormExpanded(true)}
+                    disabled={!!activeOrder}
                     className={`w-full  gap-2 rounded-full bg-terracotta px-4 py-3 text-base font-semibold text-white shadow-[0_4px_0_0_#B8401E] transition-all duration-150 not-disabled:hover:-translate-y-0.5 not-disabled:hover:bg-terracotta/90 not-disabled:hover:shadow-[0_6px_0_0_#B8401E] not-disabled:hover:cursor-pointer not-disabled:active:translate-y-0.5 not-disabled:active:shadow-[0_2px_0_0_#B8401E] disabled:opacity-50 disabled:cursor-not-allowed ${FOCUS_RING_CLASSES}`}
                   >
                     Start a new order
