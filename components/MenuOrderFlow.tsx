@@ -351,7 +351,7 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
   }
 
   return (
-    <main className="mx-auto max-w-3xl space-y-6 p-4 pb-24">
+    <main className="mx-auto max-w-6xl space-y-6 p-4 pb-24">
       <div className="flex items-center justify-between text-sm text-muted">
         <span>
           {customerName} · Table {tableNumber}
