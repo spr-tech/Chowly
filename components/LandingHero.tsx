@@ -2,7 +2,10 @@
 
 import { useCallback, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ActiveOrderBanner, type ActiveOrderInfo } from "@/components/ActiveOrderBanner";
+import {
+  ActiveOrderBanner,
+  type ActiveOrderInfo,
+} from "@/components/ActiveOrderBanner";
 import { HeroIllustration } from "@/components/HeroIllustration";
 import { FOCUS_RING_CLASSES } from "@/lib/styles";
 import {
@@ -19,7 +22,12 @@ interface TableOption {
 
 function SparkleIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor" aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      className="h-3 w-3"
+      fill="currentColor"
+      aria-hidden="true"
+    >
       <path d="M12 0l2 10 10 2-10 2-2 10-2-10L0 12l10-2z" />
     </svg>
   );
@@ -56,12 +64,17 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
   // "checking": ActiveOrderBanner hasn't reported back yet. null: no active
   // order. Otherwise: the order to lead with. formExpanded lets a returning
   // customer reach the form anyway via "Start a new order".
-  const [activeOrder, setActiveOrder] = useState<ActiveOrderInfo | null | "checking">("checking");
+  const [activeOrder, setActiveOrder] = useState<
+    ActiveOrderInfo | null | "checking"
+  >("checking");
   const [formExpanded, setFormExpanded] = useState(false);
 
-  const handleActiveOrderChange = useCallback((info: ActiveOrderInfo | null) => {
-    setActiveOrder(info);
-  }, []);
+  const handleActiveOrderChange = useCallback(
+    (info: ActiveOrderInfo | null) => {
+      setActiveOrder(info);
+    },
+    [],
+  );
 
   const showForm = activeOrder === null || formExpanded;
 
@@ -107,9 +120,10 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
                 <SparkleIcon />
                 Your table, your space
               </span>
-
-              <h1 className="font-serif text-4xl leading-[1.05] font-semibold sm:text-5xl md:text-6xl lg:text-7xl">
-                <span className="block text-ink">Good food.</span>
+              <h1 className="font-serif leading-[1.05] font-semibold sm:text-5xl md:text-6xl lg:text-7xl">
+                <span className="block text-ink font-extrabold  text-7xl">
+                  Good food.
+                </span>
                 <span className="relative inline-block text-terracotta">
                   No fuss.
                   <svg
@@ -124,14 +138,17 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
                   </svg>
                 </span>
               </h1>
-
-              <p className="text-base text-muted">Good food. Easy moments.</p>
-
+              <p className="font-serif text-lg md:text-xl text-muted italic tracking-wide">
+                Good food. Easy moments.
+              </p>{" "}
               {showForm ? (
                 <div className="space-y-4 rounded-2xl border border-line bg-paper p-5 shadow-sm">
                   <div className="flex flex-col gap-3 sm:flex-row">
                     <div className="flex-1 space-y-2">
-                      <label className="block text-sm font-medium" htmlFor="customerName">
+                      <label
+                        className="block text-sm font-medium"
+                        htmlFor="customerName"
+                      >
                         Your name
                       </label>
                       <input
@@ -144,7 +161,10 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
                     </div>
 
                     <div className="space-y-2 sm:w-40">
-                      <label className="block text-sm font-medium" htmlFor="table">
+                      <label
+                        className="block text-sm font-medium"
+                        htmlFor="table"
+                      >
                         Table
                       </label>
                       <select
@@ -155,7 +175,11 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
                       >
                         <option value="">Select…</option>
                         {tables.map((table) => (
-                          <option key={table.id} value={table.id} disabled={table.occupied}>
+                          <option
+                            key={table.id}
+                            value={table.id}
+                            disabled={table.occupied}
+                          >
                             Table {table.number}
                             {table.occupied ? " (occupied)" : ""}
                           </option>
@@ -164,13 +188,15 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
                     </div>
                   </div>
 
-                  {error && <p className="text-sm font-medium text-ink">{error}</p>}
+                  {error && (
+                    <p className="text-sm font-medium text-red-600">{error}</p>
+                  )}
 
                   <button
                     type="button"
                     onClick={handleStartOrdering}
                     disabled={isPending}
-                    className={`flex w-full items-center justify-center gap-2 rounded-full bg-terracotta px-4 py-3 text-base font-semibold text-white shadow-sm disabled:opacity-50 ${FOCUS_RING_CLASSES}`}
+                    className={`flex w-full items-center hover:bg-amber-600 hover:cursor-pointer justify-center gap-2 rounded-full bg-terracotta px-4 py-3 text-base font-semibold text-white shadow-sm disabled:opacity-50 ${FOCUS_RING_CLASSES}`}
                   >
                     {isPending ? (
                       "Starting…"
@@ -193,7 +219,6 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
                   </button>
                 )
               )}
-
               <p className="flex items-center gap-1.5 text-sm text-muted">
                 <PinIcon />
                 14 Palm Avenue, Lagos

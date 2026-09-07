@@ -26,7 +26,10 @@
   --color-line: var(--line);
 
   --font-sans: var(--font-geist-sans);
-  --font-serif: var(--font-heading), Georgia, serif;
+  
+  /* UPDATED LOGIC: */
+  /* Maps Tailwind's font-serif class to your newly declared Fraunces variable */
+  --font-serif: var(--app-font-serif), Georgia, serif;
 }
 
 body {

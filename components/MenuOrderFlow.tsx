@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { placeOrder } from "@/app/actions/orders";
 import { formatNaira } from "@/lib/money";
@@ -21,6 +22,7 @@ interface MenuItemOption {
   category: "FOOD" | "DRINK";
   priceKobo: number;
   prepTimeMinutes: number;
+  photoUrl: string | null;
 }
 
 type Category = "FOOD" | "DRINK";
@@ -392,36 +394,52 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
         {items.map((item) => (
           <div
             key={item.id}
-            className="flex flex-col gap-3 rounded-2xl border border-line bg-paper p-4 shadow-sm"
+            className="flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-paper shadow-sm"
           >
-            <div className="flex items-start justify-between gap-2">
-              <span className="text-xs font-semibold tracking-wide text-muted uppercase">
-                {item.category}
-              </span>
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-saffron text-ink">
-                <CategoryIcon category={item.category} className="h-4 w-4" />
-              </span>
-            </div>
+            {item.photoUrl && (
+              <div className="relative aspect-4/3 w-full shrink-0">
+                <Image
+                  src={item.photoUrl}
+                  alt={item.name}
+                  fill
+                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                  className="object-cover"
+                />
+              </div>
+            )}
 
-            <div className="space-y-1">
-              <h3 className="font-serif text-lg font-semibold">{item.name}</h3>
-              {item.description && <p className="text-sm text-muted">{item.description}</p>}
-            </div>
+            <div className="flex flex-1 flex-col gap-3 p-4">
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-xs font-semibold tracking-wide text-muted uppercase">
+                  {item.category}
+                </span>
+                {!item.photoUrl && (
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-saffron text-ink">
+                    <CategoryIcon category={item.category} className="h-4 w-4" />
+                  </span>
+                )}
+              </div>
 
-            <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-2">
-              <span className="text-lg font-bold text-terracotta">{formatNaira(item.priceKobo)}</span>
-              <span className="flex items-center gap-1 text-xs text-muted">
-                <ClockIcon className="h-3.5 w-3.5" />
-                {item.prepTimeMinutes} MIN
-              </span>
-              <button
-                type="button"
-                onClick={() => setQuantity(item.id, (cart[item.id] ?? 0) + 1)}
-                className={`flex items-center gap-1 rounded-full bg-ink px-3 py-1.5 text-sm font-semibold text-paper ${FOCUS_RING_CLASSES}`}
-              >
-                <PlusIcon className="h-3.5 w-3.5" />
-                Add
-              </button>
+              <div className="space-y-1">
+                <h3 className="font-serif text-lg font-semibold">{item.name}</h3>
+                {item.description && <p className="text-sm text-muted">{item.description}</p>}
+              </div>
+
+              <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-2">
+                <span className="text-lg font-bold text-terracotta">{formatNaira(item.priceKobo)}</span>
+                <span className="flex items-center gap-1 text-xs text-muted">
+                  <ClockIcon className="h-3.5 w-3.5" />
+                  {item.prepTimeMinutes} MIN
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity(item.id, (cart[item.id] ?? 0) + 1)}
+                  className={`flex items-center gap-1 rounded-full bg-ink px-3 py-1.5 text-sm font-semibold text-paper ${FOCUS_RING_CLASSES}`}
+                >
+                  <PlusIcon className="h-3.5 w-3.5" />
+                  Add
+                </button>
+              </div>
             </div>
           </div>
         ))}
