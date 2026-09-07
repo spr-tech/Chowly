@@ -91,7 +91,7 @@ export function ActiveOrderBanner({
         </div>
         <Link
           href={`/orders/${activeOrder.orderId}`}
-          className="bg-terracotta text-white rounded-full border px-4 py-2.5 text-sm font-medium transition-transform duration-150 hover:cursor-pointer active:scale-[.91] disabled:cursor-not-allowed disabled:opacity-50 shadow-[0_4px_0_0_#B8401E]"
+          className="bg-terracotta text-white rounded-full border px-4 py-2.5 text-sm font-medium transition-transform duration-150 hover:cursor-pointer hover:bg-amber-600 active:scale-[.91] disabled:cursor-not-allowed disabled:opacity-50 shadow-[0_4px_0_0_#B8401E]"
         >
           View order →
         </Link>

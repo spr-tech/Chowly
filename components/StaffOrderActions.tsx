@@ -9,7 +9,13 @@ interface StaffOption {
   role: "WAITER" | "CHEF" | "BARTENDER";
 }
 
-export function StaffOrderActions({ orderId, staff }: { orderId: string; staff: StaffOption[] }) {
+export function StaffOrderActions({
+  orderId,
+  staff,
+}: {
+  orderId: string;
+  staff: StaffOption[];
+}) {
   const waiters = staff.filter((s) => s.role === "WAITER");
   const chefs = staff.filter((s) => s.role === "CHEF");
   const bartenders = staff.filter((s) => s.role === "BARTENDER");
@@ -42,11 +48,28 @@ export function StaffOrderActions({ orderId, staff }: { orderId: string; staff: 
 
   return (
     <div className="space-y-3 rounded-2xl border border-line bg-paper p-5 shadow-sm">
-      <h2 className="font-serif text-lg font-semibold">Assign staff and mark served</h2>
+      <h2 className="font-serif text-lg font-semibold">
+        Assign staff and mark served
+      </h2>
 
-      <StaffSelect label="Waiter" value={waiterId} onChange={setWaiterId} options={waiters} />
-      <StaffSelect label="Chef" value={chefId} onChange={setChefId} options={chefs} />
-      <StaffSelect label="Bartender" value={bartenderId} onChange={setBartenderId} options={bartenders} />
+      <StaffSelect
+        label="Waiter"
+        value={waiterId}
+        onChange={setWaiterId}
+        options={waiters}
+      />
+      <StaffSelect
+        label="Chef"
+        value={chefId}
+        onChange={setChefId}
+        options={chefs}
+      />
+      <StaffSelect
+        label="Bartender"
+        value={bartenderId}
+        onChange={setBartenderId}
+        options={bartenders}
+      />
 
       {error && <p className="text-sm font-medium text-ink">{error}</p>}
 
@@ -54,7 +77,7 @@ export function StaffOrderActions({ orderId, staff }: { orderId: string; staff: 
         type="button"
         onClick={handleSubmit}
         disabled={isPending || !waiterId || !chefId || !bartenderId}
-        className="w-full rounded-full bg-terracotta px-4 py-3 text-base font-semibold text-white shadow-sm disabled:opacity-50"
+        className="bg-terracotta text-white rounded-full border px-4 py-2.5 text-sm font-medium transition-transform duration-150 hover:cursor-pointer hover:bg-amber-600 active:scale-[.91] disabled:cursor-not-allowed disabled:opacity-50 shadow-[0_4px_0_0_#B8401E]"
       >
         {isPending ? "Saving…" : "Mark Served"}
       </button>

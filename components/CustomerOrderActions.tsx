@@ -120,7 +120,7 @@ export function CustomerOrderActions({
               type="button"
               onClick={handlePay}
               disabled={isPaying}
-              className="w-full rounded-full bg-terracotta px-4 py-3 text-base font-semibold text-white shadow-sm disabled:opacity-50"
+              className="w-full rounded-full border bg-terracotta px-4 py-2.5 text-sm font-medium text-white transition-all duration-150 not-disabled:hover:cursor-pointer not-disabled:hover:bg-terracotta/90 not-disabled:active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isPaying
                 ? "Paying…"
