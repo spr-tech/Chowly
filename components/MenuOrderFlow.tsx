@@ -401,13 +401,30 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
           change
         </Link>
       </div>
-
-      <div className="flex gap-1 rounded-full border border-line bg-paper p-1 text-sm">
+      {/* intro */}
+      <div className="grid grid-cols-1 gap-4 pt-4 md:grid-cols-2 md:items-end">
+        <div>
+          <p className="text-xs font-semibold tracking-[0.15em] text-terracotta uppercase">
+            From the kitchen
+          </p>
+          <h1 className="mt-2 font-serif text-4xl leading-[1.05] font-bold tracking-tight sm:text-5xl">
+            What sounds good?
+          </h1>
+        </div>
+        <p className="text-base text-muted md:pb-2">
+          Everything is made to order. Take a look around, then send it our way
+          when you&apos;re ready.
+        </p>
+      </div>
+      <div className="sticky top-16 z-10 flex gap-3  py-3">
+        {" "}
         <button
           type="button"
           onClick={() => setActiveCategory("FOOD")}
-          className={`rounded-full px-4 py-1.5 transition-colors ${
-            activeCategory === "FOOD" ? "bg-ink text-paper" : "text-muted"
+          className={`cursor-pointer rounded-full border px-6 py-2.5 text-base font-medium transition-colors ${
+            activeCategory === "FOOD"
+              ? "border-terracotta bg-terracotta text-white"
+              : "border-line bg-paper text-muted hover:border-terracotta hover:text-terracotta"
           }`}
         >
           Food
@@ -415,8 +432,10 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
         <button
           type="button"
           onClick={() => setActiveCategory("DRINK")}
-          className={`rounded-full px-4 py-1.5 transition-colors ${
-            activeCategory === "DRINK" ? "bg-ink text-paper" : "text-muted"
+          className={`cursor-pointer rounded-full border px-6 py-2.5 text-base font-medium transition-colors ${
+            activeCategory === "DRINK"
+              ? "border-terracotta bg-terracotta text-white"
+              : "border-line bg-paper text-muted hover:border-terracotta hover:text-terracotta"
           }`}
         >
           Drinks

@@ -173,7 +173,7 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
                       <div
                         role="radiogroup"
                         aria-label="Table"
-                        className="grid grid-cols-4 gap-2 sm:grid-cols-6"
+                        className="grid max-w-lg grid-cols-6 gap-2"
                       >
                         {tables.map((table) => {
                           const isSelected = String(table.id) === tableId;
@@ -188,7 +188,7 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
                                 setTableId(String(table.id));
                                 setError(null);
                               }}
-                              className={`flex h-14 flex-col items-center justify-center rounded-lg border text-sm font-semibold transition-colors ${FOCUS_RING_CLASSES} ${
+                              className={`flex h-12 flex-col items-center justify-center rounded-lg border text-sm font-semibold transition-colors ${FOCUS_RING_CLASSES} ${
                                 table.occupied
                                   ? "cursor-not-allowed border-line bg-cream text-muted opacity-60"
                                   : isSelected
