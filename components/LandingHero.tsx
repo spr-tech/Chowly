@@ -62,12 +62,13 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
   const hasStartedRef = useRef(false);
 
   // "checking": ActiveOrderBanner hasn't reported back yet. null: no active
-  // order. Otherwise: the order to lead with. formExpanded lets a returning
-  // customer reach the form anyway via "Start a new order".
+  // order, so the form is shown. Otherwise: the order to lead with, and the
+  // form is not offered at all. Only payment releases a table, so allowing a
+  // second order would leave the first one's table occupied by an order the
+  // customer could no longer reach.
   const [activeOrder, setActiveOrder] = useState<
     ActiveOrderInfo | null | "checking"
   >("checking");
-  const [formExpanded, setFormExpanded] = useState(false);
 
   const handleActiveOrderChange = useCallback(
     (info: ActiveOrderInfo | null) => {
@@ -76,7 +77,7 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
     [],
   );
 
-  const showForm = activeOrder === null || formExpanded;
+  const showForm = activeOrder === null;
 
   function handleStartOrdering() {
     if (hasStartedRef.current) return;
@@ -112,8 +113,6 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
     <main>
       <section className="bg-cream">
         <div className="mx-auto max-w-7xl px-4 py-12 md:py-20">
-          <ActiveOrderBanner onChange={handleActiveOrderChange} />
-
           <div className="mt-6 grid grid-cols-1 items-center gap-20 lg:grid-cols-2 lg:gap-20">
             <div className="space-y-6">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-saffron/30 px-3 py-1 text-xs font-semibold text-ink">
@@ -150,7 +149,11 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
               <p className="font-serif text-md md:text-xl text-muted tracking-wide">
                 Good food. Easy moments.
               </p>
-              {showForm ? (
+
+              <div className={showForm ? "hidden" : undefined}>
+                <ActiveOrderBanner onChange={handleActiveOrderChange} />
+              </div>
+              {showForm && (
                 <div className="space-y-4 rounded-2xl border border-line bg-paper p-5 shadow-sm">
                   <div className="flex flex-col gap-4">
                     <div className="flex-1 space-y-2">
@@ -231,18 +234,8 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
                     )}
                   </button>
                 </div>
-              ) : (
-                activeOrder !== "checking" && (
-                  <button
-                    type="button"
-                    onClick={() => setFormExpanded(true)}
-                    disabled={!!activeOrder}
-                    className={`w-full  gap-2 rounded-full bg-terracotta px-4 py-3 text-base font-semibold text-white shadow-[0_4px_0_0_#B8401E] transition-all duration-150 not-disabled:hover:-translate-y-0.5 not-disabled:hover:bg-terracotta/90 not-disabled:hover:shadow-[0_6px_0_0_#B8401E] not-disabled:hover:cursor-pointer not-disabled:active:translate-y-0.5 not-disabled:active:shadow-[0_2px_0_0_#B8401E] disabled:opacity-50 disabled:cursor-not-allowed ${FOCUS_RING_CLASSES}`}
-                  >
-                    Start a new order
-                  </button>
-                )
               )}
+
               <p className="flex items-center gap-1.5 text-sm text-muted">
                 <PinIcon />
                 14 Palm Avenue, Lagos
