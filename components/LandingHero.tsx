@@ -152,7 +152,7 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
               </p>
               {showForm ? (
                 <div className="space-y-4 rounded-2xl border border-line bg-paper p-5 shadow-sm">
-                  <div className="flex flex-col gap-3 sm:flex-row">
+                  <div className="flex flex-col gap-4">
                     <div className="flex-1 space-y-2">
                       <label
                         className="block text-sm font-medium"
@@ -168,32 +168,44 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
                         placeholder="e.g. Ada"
                       />
                     </div>
-
-                    <div className="space-y-2 sm:w-40">
-                      <label
-                        className="block text-sm font-medium"
-                        htmlFor="table"
+                    <div className="space-y-2">
+                      <span className="block text-sm font-medium">Table</span>
+                      <div
+                        role="radiogroup"
+                        aria-label="Table"
+                        className="grid grid-cols-4 gap-2 sm:grid-cols-6"
                       >
-                        Table
-                      </label>
-                      <select
-                        id="table"
-                        value={tableId}
-                        onChange={(e) => setTableId(e.target.value)}
-                        className={`w-full rounded-lg border border-line bg-cream p-3 text-base ${FOCUS_RING_CLASSES}`}
-                      >
-                        <option value="">Select…</option>
-                        {tables.map((table) => (
-                          <option
-                            key={table.id}
-                            value={table.id}
-                            disabled={table.occupied}
-                          >
-                            Table {table.number}
-                            {table.occupied ? " (occupied)" : ""}
-                          </option>
-                        ))}
-                      </select>
+                        {tables.map((table) => {
+                          const isSelected = String(table.id) === tableId;
+                          return (
+                            <button
+                              key={table.id}
+                              type="button"
+                              role="radio"
+                              aria-checked={isSelected}
+                              disabled={table.occupied}
+                              onClick={() => {
+                                setTableId(String(table.id));
+                                setError(null);
+                              }}
+                              className={`flex h-14 flex-col items-center justify-center rounded-lg border text-sm font-semibold transition-colors ${FOCUS_RING_CLASSES} ${
+                                table.occupied
+                                  ? "cursor-not-allowed border-line bg-cream text-muted opacity-60"
+                                  : isSelected
+                                    ? "border-terracotta bg-terracotta text-white"
+                                    : "cursor-pointer border-line bg-cream text-ink hover:border-terracotta"
+                              }`}
+                            >
+                              {table.number}
+                              {table.occupied && (
+                                <span className="text-[9px] font-normal">
+                                  taken
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
 
@@ -204,8 +216,10 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
                   <button
                     type="button"
                     onClick={handleStartOrdering}
-                    disabled={isPending}
-                    className={`flex w-full items-center hover:bg-amber-600 hover:cursor-pointer justify-center gap-2 rounded-full bg-terracotta px-4 py-3 text-base font-semibold text-white shadow-sm disabled:opacity-50 ${FOCUS_RING_CLASSES}`}
+                    disabled={
+                      isPending || !customerName.trim() || !tableId.trim()
+                    }
+                    className={`flex w-full items-center justify-center gap-2 rounded-full bg-terracotta px-4 py-3 text-base font-semibold text-white shadow-[0_4px_0_0_#B8401E] transition-all duration-150 not-disabled:hover:-translate-y-0.5 not-disabled:hover:bg-terracotta/90 not-disabled:hover:shadow-[0_6px_0_0_#B8401E] not-disabled:hover:cursor-pointer not-disabled:active:translate-y-0.5 not-disabled:active:shadow-[0_2px_0_0_#B8401E] disabled:opacity-50 disabled:cursor-not-allowed ${FOCUS_RING_CLASSES}`}
                   >
                     {isPending ? (
                       "Starting…"
@@ -222,7 +236,7 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
                   <button
                     type="button"
                     onClick={() => setFormExpanded(true)}
-                    className={`w-full rounded-full border border-ink px-4 py-2.5 text-sm font-medium ${FOCUS_RING_CLASSES}`}
+                    className={`w-full  gap-2 rounded-full bg-terracotta px-4 py-3 text-base font-semibold text-white shadow-[0_4px_0_0_#B8401E] transition-all duration-150 not-disabled:hover:-translate-y-0.5 not-disabled:hover:bg-terracotta/90 not-disabled:hover:shadow-[0_6px_0_0_#B8401E] not-disabled:hover:cursor-pointer not-disabled:active:translate-y-0.5 not-disabled:active:shadow-[0_2px_0_0_#B8401E] disabled:opacity-50 disabled:cursor-not-allowed ${FOCUS_RING_CLASSES}`}
                   >
                     Start a new order
                   </button>

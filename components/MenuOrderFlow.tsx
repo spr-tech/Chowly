@@ -137,7 +137,13 @@ function TrashIcon({ className }: IconProps) {
   );
 }
 
-function CategoryIcon({ category, className }: { category: Category; className?: string }) {
+function CategoryIcon({
+  category,
+  className,
+}: {
+  category: Category;
+  className?: string;
+}) {
   return category === "FOOD" ? (
     <ForkKnifeIcon className={className} />
   ) : (
@@ -221,7 +227,10 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
     [cart, menuItems],
   );
 
-  const totalKobo = cartLines.reduce((sum, line) => sum + line.priceKobo * line.quantity, 0);
+  const totalKobo = cartLines.reduce(
+    (sum, line) => sum + line.priceKobo * line.quantity,
+    0,
+  );
   const totalQuantity = cartLines.reduce((sum, line) => sum + line.quantity, 0);
 
   function setQuantity(menuItemId: number, quantity: number) {
@@ -236,7 +245,10 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
       const result = await placeOrder({
         tableId: Number(tableId),
         customerName,
-        items: cartLines.map((line) => ({ menuItemId: line.id, quantity: line.quantity })),
+        items: cartLines.map((line) => ({
+          menuItemId: line.id,
+          quantity: line.quantity,
+        })),
       });
       if ("error" in result) {
         setError(result.error);
@@ -269,7 +281,9 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
             <p className="text-xs font-semibold tracking-wide text-terracotta uppercase">
               Table {tableNumber}
             </p>
-            <h1 className="font-serif text-4xl font-bold sm:text-5xl">Your order.</h1>
+            <h1 className="font-serif text-4xl font-bold sm:text-5xl">
+              Your order.
+            </h1>
             <p className="mt-1 text-sm text-muted">For {customerName}</p>
           </div>
           <button
@@ -283,22 +297,31 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_1fr]">
           <div className="rounded-2xl border border-line bg-paper p-5 shadow-sm">
-            <h2 className="mb-3 font-serif text-xl font-semibold">At the table</h2>
+            <h2 className="mb-3 font-serif text-xl font-semibold">
+              At the table
+            </h2>
             {cartLines.length === 0 ? (
               <p className="text-sm text-muted">No items yet.</p>
             ) : (
               <ul className="divide-y divide-line">
                 {cartLines.map((line) => (
-                  <li key={line.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                  <li
+                    key={line.id}
+                    className="flex flex-wrap items-center justify-between gap-3 py-3"
+                  >
                     <div>
                       <p className="font-medium">{line.name}</p>
-                      <p className="text-xs text-muted">{formatNaira(line.priceKobo)} each</p>
+                      <p className="text-xs text-muted">
+                        {formatNaira(line.priceKobo)} each
+                      </p>
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
-                          onClick={() => setQuantity(line.id, line.quantity - 1)}
+                          onClick={() =>
+                            setQuantity(line.id, line.quantity - 1)
+                          }
                           className={`flex h-8 w-8 items-center justify-center rounded-full border border-line ${FOCUS_RING_CLASSES}`}
                           aria-label={`Remove one ${line.name}`}
                         >
@@ -307,7 +330,9 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
                         <span className="w-4 text-center">{line.quantity}</span>
                         <button
                           type="button"
-                          onClick={() => setQuantity(line.id, line.quantity + 1)}
+                          onClick={() =>
+                            setQuantity(line.id, line.quantity + 1)
+                          }
                           className={`flex h-8 w-8 items-center justify-center rounded-full border border-line ${FOCUS_RING_CLASSES}`}
                           aria-label={`Add one ${line.name}`}
                         >
@@ -333,17 +358,25 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
           </div>
 
           <div className="space-y-4 rounded-2xl bg-ink p-6 text-paper shadow-sm">
-            <p className="text-xs font-semibold tracking-wide text-saffron uppercase">Almost there</p>
-            <h2 className="font-serif text-2xl font-bold">Ready when you are.</h2>
+            <p className="text-xs font-semibold tracking-wide text-saffron uppercase">
+              Almost there
+            </p>
+            <h2 className="font-serif text-2xl font-bold">
+              Ready when you are.
+            </h2>
             <p className="text-sm text-paper/70">
-              We&apos;ll send this straight to the kitchen. You can watch your order&apos;s progress
-              from the confirmation page next.
+              We&apos;ll send this straight to the kitchen. You can watch your
+              order&apos;s progress from the confirmation page next.
             </p>
             <div className="flex items-center justify-between border-t border-paper/20 pt-4">
               <span>Subtotal</span>
-              <span className="text-lg font-bold text-saffron">{formatNaira(totalKobo)}</span>
+              <span className="text-lg font-bold text-saffron">
+                {formatNaira(totalKobo)}
+              </span>
             </div>
-            {error && <p className="text-sm font-medium text-saffron">{error}</p>}
+            {error && (
+              <p className="text-sm font-medium text-saffron">{error}</p>
+            )}
             <button
               type="button"
               onClick={handleSubmit}
@@ -390,7 +423,7 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((item) => (
           <div
             key={item.id}
@@ -405,6 +438,10 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
                   sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                   className="object-cover"
                 />
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-0 bg-linear-to-t from-black/45 to-transparent"
+                />
               </div>
             )}
 
@@ -415,18 +452,27 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
                 </span>
                 {!item.photoUrl && (
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-saffron text-ink">
-                    <CategoryIcon category={item.category} className="h-4 w-4" />
+                    <CategoryIcon
+                      category={item.category}
+                      className="h-4 w-4"
+                    />
                   </span>
                 )}
               </div>
 
               <div className="space-y-1">
-                <h3 className="font-serif text-lg font-semibold">{item.name}</h3>
-                {item.description && <p className="text-sm text-muted">{item.description}</p>}
+                <h3 className="font-serif text-lg font-semibold">
+                  {item.name}
+                </h3>
+                {item.description && (
+                  <p className="text-sm text-muted">{item.description}</p>
+                )}
               </div>
 
               <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-2">
-                <span className="text-lg font-bold text-terracotta">{formatNaira(item.priceKobo)}</span>
+                <span className="text-lg font-bold text-terracotta">
+                  {formatNaira(item.priceKobo)}
+                </span>
                 <span className="flex items-center gap-1 text-xs text-muted">
                   <ClockIcon className="h-3.5 w-3.5" />
                   {item.prepTimeMinutes} MIN
