@@ -289,7 +289,7 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
           <button
             type="button"
             onClick={() => setIsCartOpen(false)}
-            className={`flex items-center gap-2 rounded-full border border-line bg-paper px-4 py-2 text-sm font-semibold shadow-sm ${FOCUS_RING_CLASSES}`}
+            className={`flex items-center gap-2 rounded-full border border-line bg-paper px-4 py-2 text-sm font-semibold shadow-sm hover:cursor-pointer ${FOCUS_RING_CLASSES}`}
           >
             <span aria-hidden="true">←</span> Add more
           </button>
@@ -322,7 +322,7 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
                           onClick={() =>
                             setQuantity(line.id, line.quantity - 1)
                           }
-                          className={`flex h-8 w-8 items-center justify-center rounded-full border border-line ${FOCUS_RING_CLASSES}`}
+                          className={`flex h-8 w-8 items-center justify-center rounded-full border border-line transition-all duration-100 ease-out hover:cursor-pointer active:scale-95 ${FOCUS_RING_CLASSES}`}
                           aria-label={`Remove one ${line.name}`}
                         >
                           −
@@ -333,7 +333,7 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
                           onClick={() =>
                             setQuantity(line.id, line.quantity + 1)
                           }
-                          className={`flex h-8 w-8 items-center justify-center rounded-full border border-line ${FOCUS_RING_CLASSES}`}
+                          className={`flex h-8 w-8 items-center justify-center rounded-full border border-line hover:cursor-pointer active:scale-[0.8] ${FOCUS_RING_CLASSES}`}
                           aria-label={`Add one ${line.name}`}
                         >
                           +
@@ -346,9 +346,9 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
                         type="button"
                         onClick={() => setQuantity(line.id, 0)}
                         aria-label={`Remove ${line.name} from order`}
-                        className={`text-muted ${FOCUS_RING_CLASSES}`}
+                        className={`text-muted hover:cursor-pointer  active:scale-90 hover:text-slate-900 ${FOCUS_RING_CLASSES}`}
                       >
-                        <TrashIcon className="h-4 w-4" />
+                        <TrashIcon className="h-4 w-4 " />
                       </button>
                     </div>
                   </li>
@@ -381,7 +381,7 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
               type="button"
               onClick={handleSubmit}
               disabled={isPending || cartLines.length === 0}
-              className={`w-full rounded-full bg-saffron px-4 py-3 text-base font-semibold text-ink disabled:opacity-50 ${FOCUS_RING_CLASSES}`}
+              className={`w-full rounded-full bg-saffron px-4 py-3 text-base font-semibold text-ink shadow-[0_4px_0_0_#C89224] transition-all duration-150 not-disabled:hover:-translate-y-0.5 not-disabled:hover:shadow-[0_6px_0_0_#C89224] not-disabled:hover:cursor-pointer not-disabled:active:translate-y-0.5 not-disabled:active:shadow-[0_2px_0_0_#C89224] disabled:opacity-50 disabled:cursor-not-allowed ${FOCUS_RING_CLASSES}`}
             >
               {isPending ? "Placing order…" : "Place Order →"}
             </button>
@@ -499,7 +499,7 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
                 <button
                   type="button"
                   onClick={() => setQuantity(item.id, (cart[item.id] ?? 0) + 1)}
-                  className={`flex items-center gap-1 rounded-full bg-ink px-3 py-1.5 text-sm font-semibold text-paper ${FOCUS_RING_CLASSES}`}
+                  className={`flex items-center gap-1 rounded-full bg-ink px-3 py-1.5 text-sm font-semibold text-paper hover:cursor-pointer active:scale-[0.8] ${FOCUS_RING_CLASSES}`}
                 >
                   <PlusIcon className="h-3.5 w-3.5" />
                   Add
@@ -509,19 +509,20 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
           </div>
         ))}
       </div>
-
-      <button
-        type="button"
-        onClick={() => setIsCartOpen(true)}
-        className={`fixed right-4 bottom-4 z-20 flex items-center gap-2 rounded-full bg-terracotta px-5 py-3 text-base font-semibold text-white shadow-lg sm:right-8 sm:bottom-8 ${FOCUS_RING_CLASSES}`}
-      >
-        <ShoppingBagIcon className="h-5 w-5" />
-        Your order
-        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-paper text-sm font-bold text-terracotta">
-          {totalQuantity}
-        </span>
-        <CheckIcon className="h-5 w-5" />
-      </button>
+      {totalQuantity > 0 && (
+        <button
+          type="button"
+          onClick={() => setIsCartOpen(true)}
+          className={`fixed right-4 bottom-4 z-20 flex items-center gap-2 rounded-full bg-terracotta px-5 py-3 text-base font-semibold text-white shadow-lg sm:right-8 sm:bottom-8 hover:cursor-pointer hover:-translate-y-0.5 duration-100 ease-in ${FOCUS_RING_CLASSES}`}
+        >
+          <ShoppingBagIcon className="h-5 w-5" />
+          Your order
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-paper text-sm font-bold text-terracotta">
+            {totalQuantity}
+          </span>
+          <CheckIcon className="h-5 w-5" />
+        </button>
+      )}
     </main>
   );
 }
