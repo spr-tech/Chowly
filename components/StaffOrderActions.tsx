@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { assignStaffAndServe } from "@/app/actions/orders";
 
 interface StaffOption {
@@ -19,9 +19,14 @@ export function StaffOrderActions({ orderId, staff }: { orderId: string; staff: 
   const [bartenderId, setBartenderId] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  // Synchronous guard against a double-fired click landing before React has
+  // re-rendered the disabled button.
+  const hasSubmittedRef = useRef(false);
 
   function handleSubmit() {
+    if (hasSubmittedRef.current) return;
     setError(null);
+    hasSubmittedRef.current = true;
     startTransition(async () => {
       const result = await assignStaffAndServe(orderId, {
         waiterId: Number(waiterId),
@@ -30,6 +35,7 @@ export function StaffOrderActions({ orderId, staff }: { orderId: string; staff: 
       });
       if (result?.error) {
         setError(result.error);
+        hasSubmittedRef.current = false;
       }
     });
   }

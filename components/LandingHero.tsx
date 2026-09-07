@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ActiveOrderBanner, type ActiveOrderInfo } from "@/components/ActiveOrderBanner";
 import { HeroIllustration } from "@/components/HeroIllustration";
@@ -46,6 +46,12 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
   const [tableId, setTableId] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  // A synchronous guard, not state: two clicks fired faster than React can
+  // re-render a disabled button both run before `isPending` would stop
+  // them. A ref is checked and set in the same tick, so the second click
+  // is rejected no matter how fast it arrives.
+  const hasStartedRef = useRef(false);
 
   // "checking": ActiveOrderBanner hasn't reported back yet. null: no active
   // order. Otherwise: the order to lead with. formExpanded lets a returning
@@ -60,6 +66,8 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
   const showForm = activeOrder === null || formExpanded;
 
   function handleStartOrdering() {
+    if (hasStartedRef.current) return;
+
     const trimmedName = customerName.trim();
     if (!trimmedName) {
       setError("Enter your name.");
@@ -70,18 +78,21 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
       return;
     }
     setError(null);
+    hasStartedRef.current = true;
 
     const table = tables.find((t) => String(t.id) === tableId);
-    try {
-      localStorage.setItem(SESSION_CUSTOMER_NAME_KEY, trimmedName);
-      localStorage.setItem(SESSION_TABLE_ID_KEY, tableId);
-      if (table) {
-        localStorage.setItem(SESSION_TABLE_NUMBER_KEY, String(table.number));
+    startTransition(() => {
+      try {
+        localStorage.setItem(SESSION_CUSTOMER_NAME_KEY, trimmedName);
+        localStorage.setItem(SESSION_TABLE_ID_KEY, tableId);
+        if (table) {
+          localStorage.setItem(SESSION_TABLE_NUMBER_KEY, String(table.number));
+        }
+      } catch {
+        // localStorage unavailable — /menu will just bounce back to "/"
       }
-    } catch {
-      // localStorage unavailable — /menu will just bounce back to "/"
-    }
-    router.push("/menu");
+      router.push("/menu");
+    });
   }
 
   return (
@@ -158,10 +169,17 @@ export function LandingHero({ tables }: { tables: TableOption[] }) {
                   <button
                     type="button"
                     onClick={handleStartOrdering}
-                    className={`flex w-full items-center justify-center gap-2 rounded-full bg-terracotta px-4 py-3 text-base font-semibold text-white shadow-sm ${FOCUS_RING_CLASSES}`}
+                    disabled={isPending}
+                    className={`flex w-full items-center justify-center gap-2 rounded-full bg-terracotta px-4 py-3 text-base font-semibold text-white shadow-sm disabled:opacity-50 ${FOCUS_RING_CLASSES}`}
                   >
-                    Start ordering
-                    <span aria-hidden="true">→</span>
+                    {isPending ? (
+                      "Starting…"
+                    ) : (
+                      <>
+                        Start ordering
+                        <span aria-hidden="true">→</span>
+                      </>
+                    )}
                   </button>
                 </div>
               ) : (

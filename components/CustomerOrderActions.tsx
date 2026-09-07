@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { payOrder, fileComplaint, submitRating } from "@/app/actions/orders";
 import { formatNaira } from "@/lib/money";
 import { ACTIVE_ORDER_STORAGE_KEY } from "@/lib/storage";
@@ -25,8 +25,22 @@ export function CustomerOrderActions({
   hasRating: boolean;
   payment: PaymentInfo | null;
 }) {
-  const [isPending, startTransition] = useTransition();
+  // Three independent transitions, not one shared — a shared pending flag
+  // meant clicking "Submit Complaint" would also show "Paying…" on the
+  // payment button, since they'd all be reading the same isPending.
+  const [isPaying, startPayTransition] = useTransition();
+  const [isSubmittingComplaint, startComplaintTransition] = useTransition();
+  const [isSubmittingRating, startRatingTransition] = useTransition();
   const [payError, setPayError] = useState<string | null>(null);
+
+  // Synchronous guards: two clicks fired faster than React can re-render a
+  // disabled button both run before `isPending` would stop them. A ref is
+  // checked and set in the same tick, so the second click is rejected no
+  // matter how fast it arrives — this is the one that matters most, since a
+  // race here would attempt two Payment rows for the same order.
+  const hasPaidRef = useRef(false);
+  const hasSubmittedComplaintRef = useRef(false);
+  const hasSubmittedRatingRef = useRef(false);
 
   const [complaintMessage, setComplaintMessage] = useState("");
   const [complaintSent, setComplaintSent] = useState(hasComplaint);
@@ -36,11 +50,14 @@ export function CustomerOrderActions({
   const [ratingSent, setRatingSent] = useState(hasRating);
 
   function handlePay() {
+    if (hasPaidRef.current) return;
     setPayError(null);
-    startTransition(async () => {
+    hasPaidRef.current = true;
+    startPayTransition(async () => {
       const result = await payOrder(orderId);
       if (result?.error) {
         setPayError(result.error);
+        hasPaidRef.current = false;
         return;
       }
       try {
@@ -54,19 +71,27 @@ export function CustomerOrderActions({
   }
 
   function handleComplaint() {
-    startTransition(async () => {
+    if (hasSubmittedComplaintRef.current) return;
+    hasSubmittedComplaintRef.current = true;
+    startComplaintTransition(async () => {
       const result = await fileComplaint(orderId, complaintMessage);
       if (!result?.error) {
         setComplaintSent(true);
+      } else {
+        hasSubmittedComplaintRef.current = false;
       }
     });
   }
 
   function handleRating() {
-    startTransition(async () => {
+    if (hasSubmittedRatingRef.current) return;
+    hasSubmittedRatingRef.current = true;
+    startRatingTransition(async () => {
       const result = await submitRating(orderId, ratingScore, ratingComment);
       if (!result?.error) {
         setRatingSent(true);
+      } else {
+        hasSubmittedRatingRef.current = false;
       }
     });
   }
@@ -90,10 +115,10 @@ export function CustomerOrderActions({
             <button
               type="button"
               onClick={handlePay}
-              disabled={isPending}
+              disabled={isPaying}
               className="w-full rounded-full bg-terracotta px-4 py-3 text-base font-semibold text-white shadow-sm disabled:opacity-50"
             >
-              {isPending ? "Paying…" : `Pretend to Pay ${formatNaira(totalKobo)} (Simulated)`}
+              {isPaying ? "Paying…" : `Pretend to Pay ${formatNaira(totalKobo)} (Simulated)`}
             </button>
           </div>
         )
@@ -114,10 +139,10 @@ export function CustomerOrderActions({
             <button
               type="button"
               onClick={handleComplaint}
-              disabled={isPending || !complaintMessage.trim()}
+              disabled={isSubmittingComplaint || !complaintMessage.trim()}
               className="w-full rounded-full border border-ink px-4 py-2.5 text-sm font-medium disabled:opacity-50"
             >
-              Submit Complaint
+              {isSubmittingComplaint ? "Submitting…" : "Submit Complaint"}
             </button>
           </>
         )}
@@ -150,10 +175,10 @@ export function CustomerOrderActions({
             <button
               type="button"
               onClick={handleRating}
-              disabled={isPending || ratingScore === 0}
+              disabled={isSubmittingRating || ratingScore === 0}
               className="w-full rounded-full border border-ink px-4 py-2.5 text-sm font-medium disabled:opacity-50"
             >
-              Submit Rating
+              {isSubmittingRating ? "Submitting…" : "Submit Rating"}
             </button>
           </>
         )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { placeOrder } from "@/app/actions/orders";
@@ -154,6 +154,9 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  // Synchronous guard against a double-fired click landing before React has
+  // re-rendered the disabled button — see the same pattern in LandingHero.
+  const hasSubmittedRef = useRef(false);
 
   // Server and first client render must match (neither has access to
   // localStorage), so the session and draft cart are only read after mount —
@@ -224,7 +227,9 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
   }
 
   function handleSubmit() {
+    if (hasSubmittedRef.current) return;
     setError(null);
+    hasSubmittedRef.current = true;
     startTransition(async () => {
       const result = await placeOrder({
         tableId: Number(tableId),
@@ -233,6 +238,7 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
       });
       if ("error" in result) {
         setError(result.error);
+        hasSubmittedRef.current = false;
         return;
       }
 
