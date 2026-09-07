@@ -416,7 +416,7 @@ export function MenuOrderFlow({ menuItems }: { menuItems: MenuItemOption[] }) {
           when you&apos;re ready.
         </p>
       </div>
-      <div className="sticky top-16 z-10 flex gap-3  py-3">
+      <div className="sticky top-16 z-10 flex gap-3  py-3 mt-4">
         {" "}
         <button
           type="button"
